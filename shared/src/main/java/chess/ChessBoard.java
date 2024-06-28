@@ -12,7 +12,7 @@ import static chess.ChessPiece.PieceType;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessPiece[][] myBoard;
+    private final ChessPiece[][] myBoard;
 
     public ChessBoard() {
         myBoard = new ChessPiece[8][8];
