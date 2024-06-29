@@ -42,6 +42,10 @@ public class ChessBoard {
         return myBoard[position.getRow() - 1][position.getColumn() - 1];
     }
 
+    public boolean isInBounds(ChessPosition thePosition) {
+        return thePosition.getRow() >= 1 && thePosition.getColumn() >= 1 && thePosition.getRow() <= 8 && thePosition.getColumn() <= 8;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

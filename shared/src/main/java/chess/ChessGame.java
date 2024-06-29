@@ -9,16 +9,21 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
+    private final ChessBoard myChessBoard;
+    private TeamColor myCurrentTeamTurn;
 
     public ChessGame() {
+        myChessBoard = new ChessBoard();
+        myCurrentTeamTurn = TeamColor.BLACK;
 
+        myChessBoard.resetBoard();
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return myCurrentTeamTurn;
     }
 
     /**
@@ -27,7 +32,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        myCurrentTeamTurn = team;
     }
 
     /**
@@ -96,7 +101,13 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                ChessPosition curPosition = new ChessPosition(i, j);
+
+                myChessBoard.addPiece(curPosition, board.getPiece(curPosition));
+            }
+        }
     }
 
     /**
@@ -105,6 +116,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return myChessBoard;
     }
 }

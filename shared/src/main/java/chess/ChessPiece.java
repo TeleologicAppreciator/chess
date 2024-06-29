@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -65,6 +66,397 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> validMoves = new ArrayList<>();
+
+        if(myPieceType.equals(ChessPiece.PieceType.KING)) {
+            for(int row = myPosition.getRow() - 1; row <= myPosition.getRow() + 1; row++) {
+                for(int col = myPosition.getColumn() - 1; col <= myPosition.getColumn() + 1; col++) {
+                    ChessPosition positionToCheck = new ChessPosition(row, col);
+
+                    if(board.isInBounds(positionToCheck) &&
+                            (board.getPiece(positionToCheck) == null || board.getPiece(positionToCheck).getTeamColor() != myTeamColor)) {
+
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    }
+                }
+            }
+        } else if(myPieceType.equals(ChessPiece.PieceType.QUEEN)) {
+            for(int row = myPosition.getRow() + 1, col = myPosition.getColumn() + 1; row <= 8 && col <= 8; row++, col++) {
+                ChessPosition positionToCheck = new ChessPosition(row, col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int row = myPosition.getRow() + 1, col = myPosition.getColumn() - 1; row <= 8 && col > 0; row++, col--) {
+                ChessPosition positionToCheck = new ChessPosition(row, col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int row = myPosition.getRow() - 1, col = myPosition.getColumn() + 1; row > 0 && col <= 8; row--, col++) {
+                ChessPosition positionToCheck = new ChessPosition(row, col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int row = myPosition.getRow() - 1, col = myPosition.getColumn() - 1; row > 0 && col > 0; row--, col--) {
+                ChessPosition positionToCheck = new ChessPosition(row, col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int row = myPosition.getRow() + 1; row < 8; row++) {
+                ChessPosition positionToCheck = new ChessPosition(row, myPosition.getColumn());
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int row = myPosition.getRow() - 1; row > 0; row--) {
+                ChessPosition positionToCheck = new ChessPosition(row, myPosition.getColumn());
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int col = myPosition.getColumn() + 1; col < 8; col++) {
+                ChessPosition positionToCheck = new ChessPosition(myPosition.getRow(), col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int col = myPosition.getColumn() - 1; col > 0; col--) {
+                ChessPosition positionToCheck = new ChessPosition(myPosition.getRow(), col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+        } else if(myPieceType.equals(ChessPiece.PieceType.BISHOP)) {
+            for(int row = myPosition.getRow() + 1, col = myPosition.getColumn() + 1; row <= 8 && col <= 8; row++, col++) {
+                ChessPosition positionToCheck = new ChessPosition(row, col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int row = myPosition.getRow() + 1, col = myPosition.getColumn() - 1; row <= 8 && col > 0; row++, col--) {
+                ChessPosition positionToCheck = new ChessPosition(row, col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int row = myPosition.getRow() - 1, col = myPosition.getColumn() + 1; row > 0 && col <= 8; row--, col++) {
+                ChessPosition positionToCheck = new ChessPosition(row, col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int row = myPosition.getRow() - 1, col = myPosition.getColumn() - 1; row > 0 && col > 0; row--, col--) {
+                ChessPosition positionToCheck = new ChessPosition(row, col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+        } else if(myPieceType.equals(ChessPiece.PieceType.KNIGHT)) {
+            ChessPosition upLeft = new ChessPosition(myPosition.getRow() + 3, myPosition.getColumn() - 1);
+            if(board.isInBounds(upLeft) && (board.getPiece(myPosition) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+                validMoves.add(new ChessMove(myPosition, upLeft, null));
+            }
+
+            ChessPosition upRight = new ChessPosition(myPosition.getRow() + 3, myPosition.getColumn() + 1);
+            if(board.isInBounds(upRight) && (board.getPiece(myPosition) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+                validMoves.add(new ChessMove(myPosition, upRight, null));
+            }
+
+            ChessPosition rightUp = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 3);
+            if(board.isInBounds(rightUp) && (board.getPiece(myPosition) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+                validMoves.add(new ChessMove(myPosition, rightUp, null));
+            }
+
+            ChessPosition rightDown = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 3);
+            if(board.isInBounds(rightDown) && (board.getPiece(myPosition) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+                validMoves.add(new ChessMove(myPosition, rightDown, null));
+            }
+
+            ChessPosition downRight = new ChessPosition(myPosition.getRow() - 3, myPosition.getColumn() + 1);
+            if(board.isInBounds(downRight) && (board.getPiece(myPosition) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+                validMoves.add(new ChessMove(myPosition, downRight, null));
+            }
+
+            ChessPosition downLeft = new ChessPosition(myPosition.getRow() - 3, myPosition.getColumn() - 1);
+            if(board.isInBounds(downLeft) && (board.getPiece(myPosition) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+                validMoves.add(new ChessMove(myPosition, downLeft, null));
+            }
+
+            ChessPosition leftDown = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 3);
+            if(board.isInBounds(leftDown) && (board.getPiece(myPosition) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+                validMoves.add(new ChessMove(myPosition, leftDown, null));
+            }
+
+            ChessPosition leftUp = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 3);
+            if(board.isInBounds(leftUp) && (board.getPiece(myPosition) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+                validMoves.add(new ChessMove(myPosition, leftUp, null));
+            }
+        } else if(myPieceType.equals(ChessPiece.PieceType.ROOK)) {
+            for(int row = myPosition.getRow() + 1; row < 8; row++) {
+                ChessPosition positionToCheck = new ChessPosition(row, myPosition.getColumn());
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int row = myPosition.getRow() - 1; row > 0; row--) {
+                ChessPosition positionToCheck = new ChessPosition(row, myPosition.getColumn());
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int col = myPosition.getColumn() + 1; col < 8; col++) {
+                ChessPosition positionToCheck = new ChessPosition(myPosition.getRow(), col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+            for(int col = myPosition.getColumn() - 1; col > 0; col--) {
+                ChessPosition positionToCheck = new ChessPosition(myPosition.getRow(), col);
+
+                if(!board.isInBounds(positionToCheck)){
+                    break;
+                }
+                if(board.getPiece(positionToCheck) == null) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                } else if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    break;
+                } else {
+                    //the only other option is if a friendly unit is occupying the space
+                    break;
+                }
+            }
+
+        } else {
+            if(myTeamColor.equals(ChessGame.TeamColor.WHITE)){
+                ChessPosition positionToCheck = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
+                boolean isNextPositionPromotion = myPosition.getRow() + 1 == 8;
+
+                if(board.getPiece(positionToCheck) == null) {
+                    if(isNextPositionPromotion){
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, ChessPiece.PieceType.QUEEN));
+                    } else {
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    }
+                }
+
+                positionToCheck = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1);
+                if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    if(isNextPositionPromotion){
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.QUEEN));
+                    } else {
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    }
+                }
+
+                positionToCheck = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1);
+                if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    if(isNextPositionPromotion){
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.QUEEN));
+                    } else {
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    }
+                }
+            } else {
+                ChessPosition positionToCheck = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
+                boolean isNextPositionPromotion = myPosition.getRow() - 1 == 1;
+
+                if(board.getPiece(positionToCheck) == null) {
+                    if(isNextPositionPromotion){
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, ChessPiece.PieceType.QUEEN));
+                    } else {
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    }
+                }
+
+                positionToCheck = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1);
+                if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    if(isNextPositionPromotion){
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.QUEEN));
+                    } else {
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    }
+                }
+
+                positionToCheck = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1);
+                if(board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                    if(isNextPositionPromotion){
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.QUEEN));
+                    } else {
+                        validMoves.add(new ChessMove(myPosition, positionToCheck, null));
+                    }
+                }
+            }
+        }
+
+        return validMoves;
     }
 }
