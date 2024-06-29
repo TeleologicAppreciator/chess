@@ -42,6 +42,12 @@ public class ChessBoard {
         return myBoard[position.getRow() - 1][position.getColumn() - 1];
     }
 
+    /**
+     * Tells whether a given position is on the chess board or not
+     *
+     * @param thePosition The position you want to check is in bounds
+     * @return If the position is in bounds return true
+     */
     public boolean isInBounds(ChessPosition thePosition) {
         return thePosition.getRow() >= 1 && thePosition.getColumn() >= 1 && thePosition.getRow() <= 8 && thePosition.getColumn() <= 8;
     }

@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -294,17 +293,17 @@ public class ChessPiece {
             }
 
             ChessPosition upRight = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn() + 1);
-            if(board.isInBounds(upRight) && (board.getPiece(upRight) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+            if(board.isInBounds(upRight) && (board.getPiece(upRight) == null || board.getPiece(upRight).getTeamColor() != myTeamColor)) {
                 validMoves.add(new ChessMove(myPosition, upRight, null));
             }
 
             ChessPosition rightUp = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 2);
-            if(board.isInBounds(rightUp) && (board.getPiece(rightUp) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+            if(board.isInBounds(rightUp) && (board.getPiece(rightUp) == null || board.getPiece(rightUp).getTeamColor() != myTeamColor)) {
                 validMoves.add(new ChessMove(myPosition, rightUp, null));
             }
 
             ChessPosition rightDown = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 2);
-            if(board.isInBounds(rightDown) && (board.getPiece(rightDown) == null || board.getPiece(upLeft).getTeamColor() != myTeamColor)) {
+            if(board.isInBounds(rightDown) && (board.getPiece(rightDown) == null || board.getPiece(rightDown).getTeamColor() != myTeamColor)) {
                 validMoves.add(new ChessMove(myPosition, rightDown, null));
             }
 
@@ -422,7 +421,7 @@ public class ChessPiece {
 
                 //diagonal right case
                 positionToCheck = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1);
-                if(board.getPiece(positionToCheck) != null && board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                if(board.isInBounds(positionToCheck) && board.getPiece(positionToCheck) != null && board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
                     if(isNextPositionPromotion){
                         validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.QUEEN));
                         validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.BISHOP));
@@ -435,7 +434,7 @@ public class ChessPiece {
 
                 //diagonal left case
                 positionToCheck = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1);
-                if(board.getPiece(positionToCheck) != null && board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                if(board.isInBounds(positionToCheck) && board.getPiece(positionToCheck) != null && board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
                     if(isNextPositionPromotion){
                         validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.QUEEN));
                         validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.BISHOP));
@@ -468,7 +467,7 @@ public class ChessPiece {
                 }
 
                 positionToCheck = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1);
-                if(board.getPiece(positionToCheck) != null && board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                if(board.isInBounds(positionToCheck) && board.getPiece(positionToCheck) != null && board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
                     if(isNextPositionPromotion){
                         validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.QUEEN));
                         validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.BISHOP));
@@ -480,7 +479,7 @@ public class ChessPiece {
                 }
 
                 positionToCheck = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1);
-                if(board.getPiece(positionToCheck) != null && board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
+                if(board.isInBounds(positionToCheck) && board.getPiece(positionToCheck) != null && board.getPiece(positionToCheck).getTeamColor() != myTeamColor) {
                     if(isNextPositionPromotion){
                         validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.QUEEN));
                         validMoves.add(new ChessMove(myPosition, positionToCheck, PieceType.BISHOP));
