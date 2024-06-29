@@ -155,7 +155,7 @@ public class PawnMoveTests {
 
     @Test
     public void pawnAdvanceBlockedBlack() {
-        validateMoves("""
+         validateMoves("""
                         | | | | | | | | |
                         | | | | | | | | |
                         | | | | | | | | |
