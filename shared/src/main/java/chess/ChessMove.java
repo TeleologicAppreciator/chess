@@ -39,12 +39,19 @@ public class ChessMove {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(myStartPosition, chessMove.myStartPosition) && Objects.equals(myEndPosition, chessMove.myEndPosition) && myPromotionType == chessMove.myPromotionType;
+        return Objects.equals(myStartPosition, chessMove.myStartPosition)
+                && Objects.equals(myEndPosition, chessMove.myEndPosition)
+                && myPromotionType == chessMove.myPromotionType;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(myStartPosition, myEndPosition, myPromotionType);
+    }
+
+    @Override
+    public String toString() {
+        return myEndPosition.toString();
     }
 
     /**

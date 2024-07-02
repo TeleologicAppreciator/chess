@@ -45,4 +45,9 @@ public class ChessPosition {
     public int hashCode() {
         return Objects.hash(myRow, myColumn);
     }
+
+    @Override
+    public String toString() {
+        return "(" + myRow + ", " + myColumn + ")";
+    }
 }
