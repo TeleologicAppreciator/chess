@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -35,6 +36,14 @@ public class ChessGame {
         myCurrentTeamTurn = team;
     }
 
+    private void setNextTeamTurn() {
+        if (getTeamTurn().equals(TeamColor.BLACK)) {
+            setTeamTurn(TeamColor.WHITE);
+        } else {
+            setTeamTurn(TeamColor.BLACK);
+        }
+    }
+
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
@@ -51,7 +60,11 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        return myChessBoard.getPiece(startPosition).pieceMoves(myChessBoard, startPosition);
+        if(this.getBoard().getPiece(startPosition) == null){
+            return null;
+        }
+
+        return this.getBoard().getPiece(startPosition).pieceMoves(this.getBoard(), startPosition);
     }
 
     /**
@@ -61,7 +74,43 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        if(this.getBoard().getPiece(move.getStartPosition()).getTeamColor() != getTeamTurn()){
+            throw new InvalidMoveException("It is not your turn");
+        }
+
+        if(!this.getBoard().getPiece(move.getStartPosition()).pieceMoves(this.getBoard(), move.getStartPosition()).contains(move.getEndPosition())){
+            throw new InvalidMoveException("This piece cannot make that type of move");
+        }
+
+        ChessPiece pieceToMove = this.getBoard().getPiece(move.getStartPosition());
+
+        ChessGame ifThisTurnGoesThrough = new ChessGame();
+        ifThisTurnGoesThrough.setTeamTurn(getTeamTurn());
+        ifThisTurnGoesThrough.getBoard().addPiece(move.getEndPosition(), pieceToMove);
+
+
+    }
+
+    private Collection<ChessMove> allMovesPossibleOnBoard(){
+        HashSet<ChessMove> movesPossible = new HashSet<ChessMove>();
+
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++){
+                ChessPosition positionToCheck = new ChessPosition(i, j);
+                ChessPiece pieceToCheck = this.getBoard().getPiece(positionToCheck);
+
+                if(pieceToCheck != null){
+                    movesPossible.addAll(pieceToCheck.pieceMoves(this.getBoard(), positionToCheck));
+                }
+            }
+        }
+
+        return movesPossible;
+    }
+
+    private ChessPosition opponentKingPosition() {
+        //if(this.TeamColor)
+        return null;
     }
 
     /**
@@ -71,7 +120,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return false;
     }
 
     /**
@@ -101,8 +150,8 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        for(int i = 0; i < 8; i++){
-            for(int j = 0; j < 8; j++){
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++){
                 ChessPosition curPosition = new ChessPosition(i, j);
 
                 myChessBoard.addPiece(curPosition, board.getPiece(curPosition));

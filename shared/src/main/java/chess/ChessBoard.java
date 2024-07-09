@@ -18,6 +18,10 @@ public class ChessBoard {
         myBoard = new ChessPiece[8][8];
     }
 
+    private ChessPiece[][] getMyBoard(){
+        return myBoard;
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *
@@ -25,7 +29,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        myBoard[position.getRow() - 1][position.getColumn() - 1] = piece;
+        getMyBoard()[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
     /**
@@ -36,10 +40,11 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        if (myBoard[position.getRow() - 1][position.getColumn() - 1] == null) {
+        if (getMyBoard()[position.getRow() - 1][position.getColumn() - 1] == null) {
             return null;
         }
-        return myBoard[position.getRow() - 1][position.getColumn() - 1];
+
+        return getMyBoard()[position.getRow() - 1][position.getColumn() - 1];
     }
 
     /**
@@ -58,12 +63,12 @@ public class ChessBoard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessBoard that = (ChessBoard) o;
-        return Objects.deepEquals(myBoard, that.myBoard);
+        return Objects.deepEquals(getMyBoard(), that.getMyBoard());
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(myBoard);
+        return Arrays.deepHashCode(getMyBoard());
     }
 
     /**
@@ -77,10 +82,10 @@ public class ChessBoard {
         spawnWhiteTeam();
     }
 
-    private void clearBoard(){
+    private void clearBoard() {
         for(int i = 0; i < 8; i++) {
             for(int j = 0; j < 8; j++) {
-                myBoard[i][j] = null;
+                getMyBoard()[i][j] = null;
             }
         }
     }
