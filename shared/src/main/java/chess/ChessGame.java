@@ -71,10 +71,11 @@ public class ChessGame {
 
         for (ChessMove currentMove : possibleMoves) {
             ChessGame ifThisMoveGoesThrough = new ChessGame();
-            ifThisMoveGoesThrough.setTeamTurn(getTeamTurn());
+            ifThisMoveGoesThrough.setBoard(this.getBoard());
             ifThisMoveGoesThrough.getBoard().addPiece(currentMove.getEndPosition(), pieceToMove);
+            ifThisMoveGoesThrough.getBoard().addPiece(currentMove.getStartPosition(), null);
 
-            if(!isInCheck(getTeamTurn())) {
+            if(!ifThisMoveGoesThrough.isInCheck(pieceToMove.getTeamColor())) {
                 validMoves.add(currentMove);
             }
         }
@@ -115,13 +116,13 @@ public class ChessGame {
         return movesPossible;
     }
 
-    private ChessPosition opponentKingPosition() {
-        boolean isWhiteTeam = getTeamTurn().equals(TeamColor.WHITE);
+    private ChessPosition opponentKingPosition(ChessBoard theBoard, ChessGame.TeamColor theTeamColor) {
+        boolean isWhiteTeam = theTeamColor.equals(TeamColor.WHITE);
 
         for(int i = 1; i < 8; i++) {
             for(int j = 1; j < 8; j++) {
                 ChessPosition positionToCheck = new ChessPosition(i, j);
-                ChessPiece pieceToCheck = this.getBoard().getPiece(positionToCheck);
+                ChessPiece pieceToCheck = theBoard.getPiece(positionToCheck);
 
                 if(pieceToCheck != null && pieceToCheck.getPieceType().equals(ChessPiece.PieceType.KING)){
                     if(isWhiteTeam && !pieceToCheck.getTeamColor().equals(TeamColor.WHITE)){
@@ -136,15 +137,15 @@ public class ChessGame {
         return null;
     }
 
-    private ChessPosition currentPlayerKingPosition() {
-        boolean isWhiteTeam = getTeamTurn().equals(TeamColor.WHITE);
+    private ChessPosition currentPlayerKingPosition(ChessBoard theBoard, TeamColor theTeamColor) {
+        boolean isWhiteTeam = theTeamColor.equals(TeamColor.WHITE);
 
-        for(int i = 1; i < 8; i++) {
-            for(int j = 1; j < 8; j++) {
+        for(int i = 1; i <= 8; i++) {
+            for(int j = 1; j <= 8; j++) {
                 ChessPosition positionToCheck = new ChessPosition(i, j);
-                ChessPiece pieceToCheck = this.getBoard().getPiece(positionToCheck);
+                ChessPiece pieceToCheck = theBoard.getPiece(positionToCheck);
 
-                if(pieceToCheck != null && pieceToCheck.getPieceType().equals(ChessPiece.PieceType.KING)){
+                if(pieceToCheck != null && pieceToCheck.getPieceType().equals(ChessPiece.PieceType.KING)) {
                     if(isWhiteTeam && pieceToCheck.getTeamColor().equals(TeamColor.WHITE)){
                         return positionToCheck;
                     } else if (!isWhiteTeam && pieceToCheck.getTeamColor().equals(TeamColor.BLACK)) {
@@ -164,8 +165,13 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        if(allMovesPossibleOnBoard().contains(currentPlayerKingPosition())){
-            return true;
+        ChessPosition kingPosition = currentPlayerKingPosition(this.getBoard(), teamColor);
+        HashSet<ChessMove> isKingInTheseMoves = (HashSet<ChessMove>) allMovesPossibleOnBoard();
+
+        for(ChessMove move : isKingInTheseMoves) {
+            if(move.getEndPosition().equals(kingPosition)) {
+                return true;
+            }
         }
 
         return false;
