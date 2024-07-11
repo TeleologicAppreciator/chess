@@ -71,6 +71,30 @@ public class ChessBoard {
         return Arrays.deepHashCode(getMyBoard());
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+
+        for(int i = 1; i <= 8; i++) {
+            for(int j = 1; j <= 8; j++) {
+                ChessPosition positionToCheck = new ChessPosition(i, j);
+
+                sb.append("|");
+                if (this.getPiece(positionToCheck) != null) {
+                    sb.append(getPiece(positionToCheck).toString());
+                } else {
+                    sb.append(" ");
+                }
+
+            }
+            sb.append("|");
+            sb.append("\n");
+        }
+
+        return sb.toString();
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)

@@ -34,6 +34,38 @@ public class ChessPiece {
         return Objects.hash(myTeamColor, myPieceType);
     }
 
+    @Override
+    public String toString() {
+        if (myPieceType == ChessPiece.PieceType.KING) {
+            return whatCaseForPieceColor("k");
+        } else if (myPieceType == ChessPiece.PieceType.QUEEN) {
+            return whatCaseForPieceColor("q");
+        } else if (myPieceType == ChessPiece.PieceType.BISHOP) {
+            return whatCaseForPieceColor("b");
+        } else if (myPieceType == ChessPiece.PieceType.KNIGHT) {
+            return whatCaseForPieceColor("n");
+        } else if (myPieceType == ChessPiece.PieceType.ROOK) {
+            return whatCaseForPieceColor("r");
+        } else if (myPieceType == ChessPiece.PieceType.PAWN) {
+            return whatCaseForPieceColor("p");
+        }
+
+        return " ";
+    }
+
+    private String whatCaseForPieceColor(String pieceTypeString) {
+        if(isWhitePiece()){
+            return pieceTypeString.toUpperCase();
+        }
+
+        return pieceTypeString;
+    }
+
+    private boolean isWhitePiece() {
+        return this.getTeamColor().equals(ChessGame.TeamColor.WHITE);
+    }
+
+
     /**
      * The various different chess piece options
      */

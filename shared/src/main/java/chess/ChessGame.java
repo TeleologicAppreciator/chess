@@ -15,7 +15,7 @@ public class ChessGame {
 
     public ChessGame() {
         myChessBoard = new ChessBoard();
-        myCurrentTeamTurn = TeamColor.BLACK;
+        myCurrentTeamTurn = TeamColor.WHITE;
 
         myChessBoard.resetBoard();
     }
@@ -90,20 +90,36 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        if(this.getBoard().getPiece(move.getStartPosition()).getTeamColor() != getTeamTurn()){
+        ChessPiece pieceToCheck = this.getBoard().getPiece(move.getStartPosition());
+
+        if(pieceToCheck == null) {
+            throw new InvalidMoveException("There is no piece at position " + move.getStartPosition());
+        }
+
+        if(this.getBoard().getPiece(move.getStartPosition()).getTeamColor() != getTeamTurn()) {
             throw new InvalidMoveException("It is not your turn");
         }
 
-        if(!this.getBoard().getPiece(move.getStartPosition()).pieceMoves(this.getBoard(), move.getStartPosition()).contains(move.getEndPosition())){
-            throw new InvalidMoveException("This piece cannot make that type of move");
+        if(!this.validMoves(move.getStartPosition()).contains(move)) {
+            throw new InvalidMoveException("Invalid move");
         }
+
+        if(move.getPromotionPiece() != null) {
+            this.getBoard().addPiece(move.getEndPosition(), new ChessPiece(pieceToCheck.getTeamColor(), move.getPromotionPiece()));
+            this.getBoard().addPiece(move.getStartPosition(), null);
+        } else {
+            this.getBoard().addPiece(move.getEndPosition(), pieceToCheck);
+            this.getBoard().addPiece(move.getStartPosition(), null);
+        }
+
+        this.setNextTeamTurn();
     }
 
-    private Collection<ChessMove> allMovesPossibleOnBoard(){
+    private Collection<ChessMove> allMovesPossibleOnBoard() {
         HashSet<ChessMove> movesPossible = new HashSet<ChessMove>();
 
-        for(int i = 1; i <= 8; i++){
-            for(int j = 1; j <= 8; j++){
+        for(int i = 1; i <= 8; i++) {
+            for(int j = 1; j <= 8; j++) {
                 ChessPosition positionToCheck = new ChessPosition(i, j);
                 ChessPiece pieceToCheck = this.getBoard().getPiece(positionToCheck);
 
@@ -124,8 +140,8 @@ public class ChessGame {
                 ChessPosition positionToCheck = new ChessPosition(i, j);
                 ChessPiece pieceToCheck = theBoard.getPiece(positionToCheck);
 
-                if(pieceToCheck != null && pieceToCheck.getPieceType().equals(ChessPiece.PieceType.KING)){
-                    if(isWhiteTeam && !pieceToCheck.getTeamColor().equals(TeamColor.WHITE)){
+                if(pieceToCheck != null && pieceToCheck.getPieceType().equals(ChessPiece.PieceType.KING)) {
+                    if(isWhiteTeam && !pieceToCheck.getTeamColor().equals(TeamColor.WHITE)) {
                         return positionToCheck;
                     } else if (!isWhiteTeam && !pieceToCheck.getTeamColor().equals(TeamColor.BLACK)) {
                         return positionToCheck;
