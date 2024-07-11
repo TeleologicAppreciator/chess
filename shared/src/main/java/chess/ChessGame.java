@@ -123,34 +123,13 @@ public class ChessGame {
                 ChessPosition positionToCheck = new ChessPosition(i, j);
                 ChessPiece pieceToCheck = this.getBoard().getPiece(positionToCheck);
 
-                if(pieceToCheck != null){
+                if(pieceToCheck != null) {
                     movesPossible.addAll(pieceToCheck.pieceMoves(this.getBoard(), positionToCheck));
                 }
             }
         }
 
         return movesPossible;
-    }
-
-    private ChessPosition opponentKingPosition(ChessBoard theBoard, ChessGame.TeamColor theTeamColor) {
-        boolean isWhiteTeam = theTeamColor.equals(TeamColor.WHITE);
-
-        for(int i = 1; i < 8; i++) {
-            for(int j = 1; j < 8; j++) {
-                ChessPosition positionToCheck = new ChessPosition(i, j);
-                ChessPiece pieceToCheck = theBoard.getPiece(positionToCheck);
-
-                if(pieceToCheck != null && pieceToCheck.getPieceType().equals(ChessPiece.PieceType.KING)) {
-                    if(isWhiteTeam && !pieceToCheck.getTeamColor().equals(TeamColor.WHITE)) {
-                        return positionToCheck;
-                    } else if (!isWhiteTeam && !pieceToCheck.getTeamColor().equals(TeamColor.BLACK)) {
-                        return positionToCheck;
-                    }
-                }
-            }
-        }
-
-        return null;
     }
 
     private ChessPosition currentPlayerKingPosition(ChessBoard theBoard, TeamColor theTeamColor) {
@@ -162,7 +141,7 @@ public class ChessGame {
                 ChessPiece pieceToCheck = theBoard.getPiece(positionToCheck);
 
                 if(pieceToCheck != null && pieceToCheck.getPieceType().equals(ChessPiece.PieceType.KING)) {
-                    if(isWhiteTeam && pieceToCheck.getTeamColor().equals(TeamColor.WHITE)){
+                    if(isWhiteTeam && pieceToCheck.getTeamColor().equals(TeamColor.WHITE)) {
                         return positionToCheck;
                     } else if (!isWhiteTeam && pieceToCheck.getTeamColor().equals(TeamColor.BLACK)) {
                         return positionToCheck;
@@ -237,8 +216,8 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        for(int i = 1; i <= 8; i++){
-            for(int j = 1; j <= 8; j++){
+        for(int i = 1; i <= 8; i++) {
+            for(int j = 1; j <= 8; j++) {
                 ChessPosition curPosition = new ChessPosition(i, j);
 
                 myChessBoard.addPiece(curPosition, board.getPiece(curPosition));
