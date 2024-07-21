@@ -6,7 +6,7 @@ import model.UserData;
 import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO {
-    private HashMap<String, UserData> myUserData;
+    private final HashMap<String, UserData> myUserData = new HashMap<>();
 
     public void createUser(UserData theUserData) {
         myUserData.put(theUserData.myUsername(), theUserData);

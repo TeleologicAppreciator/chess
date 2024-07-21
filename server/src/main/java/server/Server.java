@@ -1,25 +1,37 @@
 package server;
 
+import org.eclipse.jetty.client.HttpResponseException;
+import service.DeleteService;
 import spark.*;
 
 public class Server {
+    private final DeleteService myService;
 
-    public int run(int desiredPort) {
+    public Server(DeleteService theService) {
+        myService = theService;
+    }
+
+    public Server run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-
-        //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
+        Spark.delete("/db", this::deleteAll);
 
         Spark.awaitInitialization();
-        return Spark.port();
+        return this;
     }
 
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    private Object deleteAll(Request req, Response res) {
+        myService.deleteAllData();
+
+        res.status(200);
+        return "";
     }
 }
