@@ -6,14 +6,15 @@ import java.lang.reflect.Type;
 
 public class Deserializer {
     private String myObjectToDeserialize;
-    private Object myObjectType;
+    private Object myTypeOfObjectToDeserialize;
 
-    public Deserializer(String theObjectToDeserialize, Object theObjectType) {
+    public Deserializer(String theObjectToDeserialize, Object theTypeOfObjectToDeserialize) {
         myObjectToDeserialize = theObjectToDeserialize;
+        myTypeOfObjectToDeserialize = theTypeOfObjectToDeserialize;
     }
 
     public Object deserialize() {
         var deserializeMethod = new Gson();
-        return deserializeMethod.fromJson(myObjectToDeserialize, (Type) myObjectType);
+        return deserializeMethod.fromJson(myObjectToDeserialize, myTypeOfObjectToDeserialize.getClass());
     }
 }

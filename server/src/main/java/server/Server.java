@@ -2,15 +2,18 @@ package server;
 
 import dataaccess.*;
 import handler.DeleteAllHandler;
+import handler.RegisterHandler;
 import model.AuthData;
 import model.UserData;
 import service.DeleteAllService;
+import service.RegisterService;
 import spark.*;
 
 import java.util.UUID;
 
 public class Server {
     private final DeleteAllHandler myDeleteAllHandler;
+    private final RegisterHandler myRegisterHandler;
     private final UserDAO myUserDatabase;
     private final AuthDAO myAuthDatabase;
     private final GameDAO myGameDatabase;
@@ -21,6 +24,7 @@ public class Server {
         myGameDatabase = new MemoryGameDAO();
 
         myDeleteAllHandler = new DeleteAllHandler(new DeleteAllService(myUserDatabase, myAuthDatabase, myGameDatabase));
+        myRegisterHandler = new RegisterHandler(new RegisterService(myUserDatabase));
     }
 
     public int run(int desiredPort) {
@@ -29,7 +33,8 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.post("/user", this::createUser);
+        Spark.post("/user", myRegisterHandler::register);
+        Spark.post("/session", )
         Spark.delete("/db", myDeleteAllHandler::deleteAll);
 
         Spark.awaitInitialization();
@@ -39,9 +44,5 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
-    }
-
-    private Object createUser(Request theRequest, Response theResponse) {
-        myService.createUser();
     }
 }
