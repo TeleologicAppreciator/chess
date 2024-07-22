@@ -2,12 +2,12 @@ package service;
 
 import dataaccess.*;
 
-public class DeleteService {
+public class DeleteAllService {
     private final UserDAO myUserData;
     private final AuthDAO myAuthData;
     private final GameDAO myGameData;
 
-    public DeleteService(UserDAO theUserData, AuthDAO theAuthData, GameDAO theGameData) {
+    public DeleteAllService(UserDAO theUserData, AuthDAO theAuthData, GameDAO theGameData) {
         myUserData = theUserData;
         myAuthData = theAuthData;
         myGameData = theGameData;
