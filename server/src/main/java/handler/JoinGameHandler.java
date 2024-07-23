@@ -3,7 +3,6 @@ package handler;
 import request.JoinGameRequest;
 import result.JoinGameResult;
 import serialization.Deserializer;
-import serialization.Serializer;
 import service.JoinGameService;
 import spark.Request;
 import spark.Response;
@@ -30,7 +29,7 @@ public class JoinGameHandler {
             return "";
         } else {
             theResponse.status(400);
-            return joinGameStatus.getMessage();
+            return joinGameStatus.getErrorMessage();
         }
     }
 }

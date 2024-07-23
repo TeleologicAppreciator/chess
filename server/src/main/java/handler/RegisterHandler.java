@@ -22,6 +22,17 @@ public class RegisterHandler {
 
         RegisterResult registerResult = myRegisterService.registerUser(registerInfo);
 
+        String errorCode = registerResult.getErrorMessage();
+        if (errorCode != null) {
+            if(errorCode.equals("Error: already taken")) {
+                theResponse.status(403);
+            } else if (errorCode.equals("Error: bad request")) {
+                theResponse.status(400);
+            }
+        } else {
+            theResponse.status(200);
+        }
+
         Serializer registerSerializer = new Serializer(registerResult);
         return registerSerializer.serialize();
     }

@@ -1,8 +1,6 @@
 package handler;
 
 import request.LoginRequest;
-import request.RegisterRequest;
-import result.RegisterResult;
 import serialization.Deserializer;
 import serialization.Serializer;
 import service.LoginService;

@@ -10,14 +10,10 @@ public class JoinGameResult extends Result {
     }
 
     public JoinGameResult(String theErrorMessage) {
-        message = theErrorMessage;
+        super(theErrorMessage);
     }
 
     public Integer getIfThereIsAnErrorThisNeedsToBeNull() {
         return ifThereIsAnErrorThisNeedsToBeNull;
-    }
-
-    public String getMessage() {
-        return message;
     }
 }

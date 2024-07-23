@@ -7,7 +7,7 @@ public class LogoutResult extends Result {
         noError = isThereAnErrorIfSoThisNeedsToBeNull;
     }
 
-    public LogoutResult(String errorMessage) {
-        message = errorMessage;
+    public LogoutResult(String theErrorMessage) {
+        super(theErrorMessage);
     }
 }

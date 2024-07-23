@@ -39,7 +39,7 @@ public class JoinGameRequest {
     }
 
     public void setPlayerColor(String thePlayerColor) {
-        if(thePlayerColor.equalsIgnoreCase("white")){
+        if(thePlayerColor.equalsIgnoreCase("white")) {
             teamColorOfJoiningPlayer = ChessGame.TeamColor.WHITE;
         } else {
             teamColorOfJoiningPlayer = ChessGame.TeamColor.BLACK;

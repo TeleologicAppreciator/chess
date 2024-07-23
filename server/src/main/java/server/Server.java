@@ -9,6 +9,7 @@ public class Server {
     private final UserDAO myUserDatabase;
     private final AuthDAO myAuthDatabase;
     private final GameDAO myGameDatabase;
+
     private final DeleteAllHandler myDeleteAllHandler;
     private final RegisterHandler myRegisterHandler;
     private final LoginHandler myLoginHandler;
@@ -23,11 +24,15 @@ public class Server {
         myAuthDatabase = new MemoryAuthDAO();
         myGameDatabase = new MemoryGameDAO();
 
-        myDeleteAllHandler = new DeleteAllHandler(new DeleteAllService(myUserDatabase, myAuthDatabase, myGameDatabase));
+        myDeleteAllHandler = new DeleteAllHandler(
+                new DeleteAllService(myUserDatabase, myAuthDatabase, myGameDatabase));
+
         myRegisterHandler = new RegisterHandler(new RegisterService(myUserDatabase, myAuthDatabase));
         myLoginHandler = new LoginHandler(new LoginService(myUserDatabase, myAuthDatabase));
         myLogoutHandler = new LogoutHandler(new LogoutService(myAuthDatabase));
-        myRetrieveAllGamesHandler = new RetrieveAllGamesHandler(new RetrieveAllGamesService(myAuthDatabase, myGameDatabase));
+        myRetrieveAllGamesHandler = new RetrieveAllGamesHandler(
+                new RetrieveAllGamesService(myAuthDatabase, myGameDatabase));
+
         myCreateGameHandler = new CreateGameHandler(new CreateGameService(myAuthDatabase, myGameDatabase));
         myJoinGameHandler = new JoinGameHandler(new JoinGameService(myAuthDatabase, myGameDatabase));
     }

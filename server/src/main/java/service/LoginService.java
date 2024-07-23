@@ -28,11 +28,6 @@ public class LoginService {
             return new LoginResult("Error: unauthorized");
         }
 
-
-        //if null its an error
-
-        //if passwords don't match its an authentication error
-
         String authToken = UUID.randomUUID().toString();
         AuthData newLoginAuthentication = new AuthData(authToken, userToLogin.username());
         myAuthData.createAuth(newLoginAuthentication);

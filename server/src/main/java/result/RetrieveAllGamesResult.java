@@ -10,6 +10,7 @@ public class RetrieveAllGamesResult extends Result {
     }
 
     public RetrieveAllGamesResult(String theErrorMessage) {
-        message = theErrorMessage;
+        super(theErrorMessage);
     }
+
 }

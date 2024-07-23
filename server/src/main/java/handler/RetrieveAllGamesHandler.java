@@ -2,7 +2,6 @@ package handler;
 
 import request.RetrieveAllGamesRequest;
 import result.RetrieveAllGamesResult;
-import serialization.Deserializer;
 import serialization.Serializer;
 import service.RetrieveAllGamesService;
 import spark.Request;
@@ -18,7 +17,8 @@ public class RetrieveAllGamesHandler {
     public Object retrieveAllGames(Request theRequest, Response theResponse) {
         var retrieveAllGamesRequest = new RetrieveAllGamesRequest(theRequest.headers("Authorization"));
 
-        RetrieveAllGamesResult retrieveAllGamesResult = myRetrieveAllGamesService.retrieveAllGames(retrieveAllGamesRequest);
+        RetrieveAllGamesResult retrieveAllGamesResult =
+                myRetrieveAllGamesService.retrieveAllGames(retrieveAllGamesRequest);
 
         Serializer serializer = new Serializer(retrieveAllGamesResult);
         return serializer.serialize();

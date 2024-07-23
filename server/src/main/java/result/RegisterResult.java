@@ -9,7 +9,7 @@ public class RegisterResult extends Result {
         authToken = theAuthToken;
     }
 
-    public RegisterResult(String theError) {
-        message = theError;
+    public RegisterResult(String theErrorMessage) {
+        super(theErrorMessage);
     }
 }

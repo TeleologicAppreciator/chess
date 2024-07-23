@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
@@ -22,12 +23,16 @@ public class RegisterService {
         UserData registerData = new UserData(
                 theUserLoginData.username(), theUserLoginData.password(), theUserLoginData.email());
 
-        //UserData checkIfAlreadyUser = myUserData.getUser(registerData.username());
+        try {
+            myUserData.createUser(registerData);
+        } catch (DataAccessException e) {
+            if (e.getMessage().equals("User already exists")) {
+                return new RegisterResult("Error: already taken");
+            } else if (e.getMessage().equals("Username and password are required")) {
+                return new RegisterResult("Error: bad request");
+            }
+        }
 
-        //if (checkIfAlreadyUser == null) {
-            //myUserData.createUser(registerData);
-        //}
-        myUserData.createUser(registerData);
         String username = registerData.username();
 
         var authToken = UUID.randomUUID().toString();

@@ -8,6 +8,6 @@ public class CreateGameResult extends Result {
     }
 
     public CreateGameResult(String theErrorMessage) {
-        message = theErrorMessage;
+        super(theErrorMessage);
     }
 }
