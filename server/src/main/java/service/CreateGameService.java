@@ -16,7 +16,7 @@ public class CreateGameService {
     }
 
     public CreateGameResult createGame(CreateGameRequest theCreateGameRequest) {
-        myAuthData.getAuth(theCreateGameRequest.authToken());
+        //myAuthData.getAuth(theCreateGameRequest.authToken());
 
         //auth token is valid
 

@@ -10,7 +10,13 @@ public class MemoryAuthDAO implements AuthDAO {
         myAuthData.put(theUserAuthData.authToken(), theUserAuthData);
     }
 
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        AuthData returnDataFromToken = myAuthData.get(authToken);
+
+        if (returnDataFromToken == null) {
+            throw new DataAccessException("Auth token not found");
+        }
+
         return myAuthData.get(authToken);
     }
 

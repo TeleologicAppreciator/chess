@@ -16,7 +16,7 @@ public class RetrieveAllGamesService {
     }
 
     public RetrieveAllGamesResult retrieveAllGames(RetrieveAllGamesRequest theRetrieveAllGamesRequest) {
-        AuthData currentAuth = myAuthData.getAuth(theRetrieveAllGamesRequest.myAuthToken());
+        //AuthData currentAuth = myAuthData.getAuth(theRetrieveAllGamesRequest.myAuthToken());
 
         //currentAuth isn't null
 

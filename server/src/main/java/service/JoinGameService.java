@@ -17,11 +17,11 @@ public class JoinGameService {
     }
 
     public JoinGameResult joinGame(JoinGameRequest theJoinGameRequest) {
-        AuthData theUserAuthData = myAuthData.getAuth(theJoinGameRequest.authToken());
+        //AuthData theUserAuthData = myAuthData.getAuth(theJoinGameRequest.authToken());
 
         GameData gameToJoin = myGameData.getGame(theJoinGameRequest.gameID());
 
-        myGameData.updateGame(theJoinGameRequest.teamColorOfJoiningPlayer(), theUserAuthData, gameToJoin);
+        //myGameData.updateGame(theJoinGameRequest.teamColorOfJoiningPlayer(), theUserAuthData, gameToJoin);
 
         return new JoinGameResult(Integer.valueOf(1));
     }
