@@ -1,29 +1,26 @@
 package service;
 
 import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
+import result.*;
 import model.AuthData;
 import request.LogoutRequest;
-import result.LogoutResult;
 
-public class LogoutService {
-    private AuthDAO myAuthData;
-
+public class LogoutService extends AuthService {
     public LogoutService(AuthDAO theAuthData) {
-        myAuthData = theAuthData;
+        super(theAuthData);
     }
 
-    public LogoutResult logout(LogoutRequest theLogoutRequest) {
-        AuthData authDataToCheck = null;
+    public Result logout(LogoutRequest theLogoutRequest) {
+        AuthData authDataToVerify = userAuthorizedVerification(theLogoutRequest.myAuthToken());
 
-        try {
-            authDataToCheck = myAuthData.getAuth(theLogoutRequest.myAuthToken());
-        } catch(DataAccessException e) {
-            return new LogoutResult("Error: unauthorized");
+        Result authorizationResult = unauthorized(authDataToVerify);
+
+        if (authorizationResult != null) {
+            return authorizationResult;
         }
 
-        myAuthData.deleteAuth(authDataToCheck);
+        this.getAuthData().deleteAuth(authDataToVerify);
 
-        return new LogoutResult();
+        return new Result();
     }
 }

@@ -6,12 +6,11 @@ import model.AuthData;
 import request.RetrieveAllGamesRequest;
 import result.RetrieveAllGamesResult;
 
-public class RetrieveAllGamesService {
-    private final AuthDAO myAuthData;
+public class RetrieveAllGamesService extends AuthService {
     private final GameDAO myGameData;
 
     public RetrieveAllGamesService(AuthDAO theAuthData, GameDAO theGameData) {
-        myAuthData = theAuthData;
+        super(theAuthData);
         myGameData = theGameData;
     }
 

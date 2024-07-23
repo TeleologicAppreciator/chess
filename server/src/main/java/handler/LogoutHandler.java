@@ -1,7 +1,7 @@
 package handler;
 
 import request.LogoutRequest;
-import result.LogoutResult;
+import result.Result;
 import serialization.Serializer;
 import service.LogoutService;
 import spark.Request;
@@ -17,9 +17,9 @@ public class LogoutHandler {
     public Object logout(Request theRequest, Response theResponse) {
         LogoutRequest logoutRequest = new LogoutRequest(theRequest.headers("Authorization"));
 
-        LogoutResult logoutResult = myLogoutService.logout(logoutRequest);
+        Result logoutResult = myLogoutService.logout(logoutRequest);
 
-        if (logoutResult.hasError()) {
+        if (logoutResult.getErrorMessage() != null) {
             theResponse.status(401);
             Serializer errorLogoutSerializer = new Serializer(logoutResult);
             return errorLogoutSerializer.serialize();

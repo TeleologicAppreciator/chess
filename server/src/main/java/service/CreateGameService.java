@@ -2,23 +2,28 @@ package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
+import model.AuthData;
 import model.GameData;
 import request.CreateGameRequest;
 import result.CreateGameResult;
+import result.Result;
 
-public class CreateGameService {
-    private AuthDAO myAuthData;
+public class CreateGameService extends AuthService {
     private GameDAO myGameData;
 
     public CreateGameService(AuthDAO theAuthData, GameDAO theGameData) {
-        myAuthData = theAuthData;
+        super(theAuthData);
         myGameData = theGameData;
     }
 
-    public CreateGameResult createGame(CreateGameRequest theCreateGameRequest) {
-        //myAuthData.getAuth(theCreateGameRequest.authToken());
+    public Result createGame(CreateGameRequest theCreateGameRequest) {
+        AuthData authDataToVerify = userAuthorizedVerification(theCreateGameRequest.authToken());
 
-        //auth token is valid
+        Result authorizationResult = unauthorized(authDataToVerify);
+
+        if (authorizationResult != null) {
+            return authorizationResult;
+        }
 
         GameData newGame = myGameData.createGame(theCreateGameRequest.gameName());
 

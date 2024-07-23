@@ -1,7 +1,7 @@
 package handler;
 
 import request.CreateGameRequest;
-import result.CreateGameResult;
+import result.Result;
 import serialization.Deserializer;
 import serialization.Serializer;
 import service.CreateGameService;
@@ -22,7 +22,16 @@ public class CreateGameHandler {
         CreateGameRequest createGameRequest = (CreateGameRequest) deserializeCreateGameHandler.deserialize();
         createGameRequest.setAuthToken(authToken);
 
-        CreateGameResult createGameResult = myCreateGameService.createGame(createGameRequest);
+        Result createGameResult = myCreateGameService.createGame(createGameRequest);
+
+        String errorMessage = createGameResult.getErrorMessage();
+        if(errorMessage != null) {
+            if(errorMessage.equals("Error: bad request")) {
+                theResponse.status(400);
+            } else {
+                theResponse.status(401);
+            }
+        }
 
         Serializer serializer = new Serializer(createGameResult);
         return serializer.serialize();
