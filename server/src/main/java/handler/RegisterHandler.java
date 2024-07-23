@@ -2,6 +2,7 @@ package handler;
 
 import request.RegisterRequest;
 import result.RegisterResult;
+import result.Result;
 import serialization.Deserializer;
 import serialization.Serializer;
 import service.RegisterService;
@@ -20,7 +21,7 @@ public class RegisterHandler {
 
         RegisterRequest registerInfo = (RegisterRequest) deserializeRegisterInfo.deserialize();
 
-        RegisterResult registerResult = myRegisterService.registerUser(registerInfo);
+        Result registerResult = myRegisterService.registerUser(registerInfo);
 
         String errorCode = registerResult.getErrorMessage();
         if (errorCode != null) {

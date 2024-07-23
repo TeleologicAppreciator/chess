@@ -1,28 +1,51 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
 import request.JoinGameRequest;
 import result.JoinGameResult;
+import result.Result;
 
-public class JoinGameService {
-    private AuthDAO myAuthData;
+public class JoinGameService extends AuthService{
     private GameDAO myGameData;
 
     public JoinGameService(AuthDAO theAuthData, GameDAO theGameData) {
-        myAuthData = theAuthData;
+        super(theAuthData);
         myGameData = theGameData;
     }
 
-    public JoinGameResult joinGame(JoinGameRequest theJoinGameRequest) {
-        //AuthData theUserAuthData = myAuthData.getAuth(theJoinGameRequest.authToken());
+    public Result joinGame(JoinGameRequest theJoinGameRequest) {
+        AuthData authDataToVerify = userAuthorizedVerification(theJoinGameRequest.authToken());
 
-        GameData gameToJoin = myGameData.getGame(theJoinGameRequest.gameID());
+        Result authorizationResult = unauthorized(authDataToVerify);
 
-        //myGameData.updateGame(theJoinGameRequest.teamColorOfJoiningPlayer(), theUserAuthData, gameToJoin);
+        if (authorizationResult != null) {
+            return authorizationResult;
+        }
 
-        return new JoinGameResult(Integer.valueOf(1));
+        GameData gameToJoin;
+
+        try {
+            gameToJoin = myGameData.getGame(theJoinGameRequest.gameID());
+        } catch (DataAccessException e) {
+            return new Result("Error: bad request");
+        }
+
+        try {
+            myGameData.updateGame(
+                    theJoinGameRequest.playerColor(), authDataToVerify.username(), gameToJoin);
+
+        } catch (DataAccessException e) {
+            if(e.getMessage().equals("Invalid player color")) {
+                return new Result("Error: bad request");
+            } else {
+                return new Result("Error: already taken");
+            }
+        }
+
+        return new Result();
     }
 }

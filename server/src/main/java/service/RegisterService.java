@@ -7,6 +7,7 @@ import model.AuthData;
 import model.UserData;
 import request.RegisterRequest;
 import result.RegisterResult;
+import result.Result;
 
 import java.util.UUID;
 
@@ -19,7 +20,7 @@ public class RegisterService {
         myAuthData = authData;
     }
 
-    public RegisterResult registerUser(RegisterRequest theUserLoginData) {
+    public Result registerUser(RegisterRequest theUserLoginData) {
         UserData registerData = new UserData(
                 theUserLoginData.username(), theUserLoginData.password(), theUserLoginData.email());
 
@@ -27,9 +28,9 @@ public class RegisterService {
             myUserData.createUser(registerData);
         } catch (DataAccessException e) {
             if (e.getMessage().equals("User already exists")) {
-                return new RegisterResult("Error: already taken");
+                return new Result("Error: already taken");
             } else if (e.getMessage().equals("Username and password are required")) {
-                return new RegisterResult("Error: bad request");
+                return new Result("Error: bad request");
             }
         }
 

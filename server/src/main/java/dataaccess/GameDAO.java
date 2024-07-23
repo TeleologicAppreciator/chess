@@ -9,9 +9,10 @@ import java.util.Collection;
 public interface GameDAO extends DataAccess {
     public GameData createGame(String theGameName);
 
-    public GameData getGame(int theGameID);
+    public GameData getGame(int theGameID) throws DataAccessException;
 
     public GameData[] getAllGames();
 
-    public void updateGame(ChessGame.TeamColor thePlayerColor, AuthData theUserAuthData, GameData theGame);
+    public void updateGame(String thePlayerColor, String username, GameData theGame)
+            throws DataAccessException;
 }

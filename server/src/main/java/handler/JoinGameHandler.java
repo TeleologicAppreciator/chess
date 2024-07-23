@@ -1,8 +1,9 @@
 package handler;
 
 import request.JoinGameRequest;
-import result.JoinGameResult;
+import result.Result;
 import serialization.Deserializer;
+import serialization.Serializer;
 import service.JoinGameService;
 import spark.Request;
 import spark.Response;
@@ -22,14 +23,22 @@ public class JoinGameHandler {
         JoinGameRequest joinGameRequest = (JoinGameRequest) deserializeJoinGameRequest.deserialize();
         joinGameRequest.setAuthToken(authToken);
 
-        JoinGameResult joinGameStatus = myJoinGameService.joinGame(joinGameRequest);
+        Result joinGameStatus = myJoinGameService.joinGame(joinGameRequest);
+        String errorMessage = joinGameStatus.getErrorMessage();
 
-        if(joinGameStatus.getIfThereIsAnErrorThisNeedsToBeNull() != null) {
+        if(errorMessage == null) {
             theResponse.status(200);
             return "";
-        } else {
+        } else if(errorMessage.equals("Error: unauthorized")) {
+            theResponse.status(401);;
+        } else if(errorMessage.equals("Error: bad request")) {
             theResponse.status(400);
-            return joinGameStatus.getErrorMessage();
+        } else {
+            //already taken error
+            theResponse.status(403);
         }
+
+        Serializer errorSerializer = new Serializer(joinGameStatus);
+        return errorSerializer.serialize();
     }
 }

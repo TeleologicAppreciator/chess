@@ -21,7 +21,13 @@ public class MemoryGameDAO implements GameDAO {
         return newGame;
     }
 
-    public GameData getGame(int gameID) {
+    public GameData getGame(int gameID) throws DataAccessException {
+        GameData gameFromGameID = myGameData.get(gameID);
+
+        if (gameFromGameID == null) {
+            throw new DataAccessException("Game not found");
+        }
+
         return myGameData.get(gameID);
     }
 
@@ -35,18 +41,33 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame(ChessGame.TeamColor thePlayerColor, AuthData theUserAuthData, GameData theGame){
-        String newGamePlayer = theUserAuthData.username();
+    public void updateGame(String thePlayerColor, String theUsername, GameData theGame)
+            throws DataAccessException {
+
+        String newGamePlayer = theUsername;
 
         int gameIDOfUpdatingGame = theGame.gameID();
 
         GameData gameToUpdate = myGameData.get(gameIDOfUpdatingGame);
 
-        if(thePlayerColor.equals(ChessGame.TeamColor.BLACK)){
+        ChessGame.TeamColor playerColor = whatPlayerColor(thePlayerColor);
+
+        if(playerColor == null) {
+            throw new DataAccessException("Invalid player color");
+        }
+        else if(playerColor.equals(ChessGame.TeamColor.BLACK)) {
+            if(gameToUpdate.blackUsername() != null) {
+                throw new DataAccessException("Black username already exists");
+            }
+
             gameToUpdate = new GameData(theGame.gameID(),
                     theGame.whiteUsername(), newGamePlayer,
                     theGame.gameName(), theGame.game());
         } else {
+            if(gameToUpdate.whiteUsername() != null) {
+                throw new DataAccessException("White username already exists");
+            }
+
             gameToUpdate = new GameData(theGame.gameID(),
                     newGamePlayer, theGame.blackUsername(),
                     theGame.gameName(), theGame.game());
@@ -62,5 +83,21 @@ public class MemoryGameDAO implements GameDAO {
 
     private void incrementGameID(){
         gameID++;
+    }
+
+    private ChessGame.TeamColor whatPlayerColor(String thePlayerColor) {
+        if(thePlayerColor == null) {
+            return null;
+        }
+
+        ChessGame.TeamColor resultTeamColor = null;
+
+        if(thePlayerColor.equalsIgnoreCase("white")) {
+            resultTeamColor = ChessGame.TeamColor.WHITE;
+        } else if(thePlayerColor.equalsIgnoreCase("black")) {
+            resultTeamColor = ChessGame.TeamColor.BLACK;
+        }
+
+        return resultTeamColor;
     }
 }
