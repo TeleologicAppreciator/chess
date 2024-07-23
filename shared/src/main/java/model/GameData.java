@@ -2,5 +2,5 @@ package model;
 
 import chess.ChessGame;
 
-public record GameData(int myGameID, String myWhiteUsername, String myBlackUsername,
-                       String myGameName, ChessGame myGame) {}
+public record GameData(int gameID, String whiteUsername, String blackUsername,
+                       String gameName, ChessGame game) {}

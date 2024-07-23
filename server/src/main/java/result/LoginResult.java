@@ -1,6 +1,15 @@
 package result;
 
 public class LoginResult extends Result {
-    String myUsername;
-    String myAuthToken;
+    String username;
+    String authToken;
+
+    public LoginResult(String theUsername, String theAuthToken) {
+        username = theUsername;
+        authToken = theAuthToken;
+    }
+
+    public LoginResult(String theErrorMessage) {
+        message = theErrorMessage;
+    }
 }

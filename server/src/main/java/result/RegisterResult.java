@@ -1,15 +1,15 @@
 package result;
 
 public class RegisterResult extends Result {
-    String myUsername;
-    String myAuthToken;
+    String username;
+    String authToken;
 
     public RegisterResult(String theUsername, String theAuthToken) {
-        myUsername = theUsername;
-        myAuthToken = theAuthToken;
+        username = theUsername;
+        authToken = theAuthToken;
     }
 
     public RegisterResult(String theError) {
-        myMessage = theError;
+        message = theError;
     }
 }

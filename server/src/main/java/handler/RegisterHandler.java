@@ -7,9 +7,6 @@ import serialization.Serializer;
 import service.RegisterService;
 import spark.Request;
 import spark.Response;
-import com.google.gson.Gson;
-
-import java.lang.reflect.Type;
 
 public class RegisterHandler {
     private RegisterService myRegisterService;
@@ -19,10 +16,9 @@ public class RegisterHandler {
     }
 
     public Object register(Request theRequest, Response theResponse) {
-        RegisterRequest registerInfo;
         var deserializeRegisterInfo = new Deserializer(theRequest.body(), new RegisterRequest("", "", ""));
 
-        registerInfo = (RegisterRequest) deserializeRegisterInfo.deserialize();
+        RegisterRequest registerInfo = (RegisterRequest) deserializeRegisterInfo.deserialize();
 
         RegisterResult registerResult = myRegisterService.registerUser(registerInfo);
 
