@@ -2,12 +2,8 @@ package server;
 
 import dataaccess.*;
 import handler.*;
-import model.AuthData;
-import model.UserData;
 import service.*;
 import spark.*;
-
-import java.util.UUID;
 
 public class Server {
     private final UserDAO myUserDatabase;

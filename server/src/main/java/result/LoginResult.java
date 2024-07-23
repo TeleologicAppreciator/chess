@@ -12,4 +12,12 @@ public class LoginResult extends Result {
     public LoginResult(String theErrorMessage) {
         message = theErrorMessage;
     }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }

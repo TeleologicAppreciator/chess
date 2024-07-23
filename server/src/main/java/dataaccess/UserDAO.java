@@ -6,5 +6,5 @@ import model.UserData;
 public interface UserDAO extends DataAccess {
     public void createUser(UserData theUser);
 
-    public UserData getUser(String theUsername);
+    public UserData getUser(String theUsername, String thePassword) throws DataAccessException;
 }

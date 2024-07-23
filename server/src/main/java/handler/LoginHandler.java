@@ -25,6 +25,10 @@ public class LoginHandler {
 
         LoginResult loginResult = myLoginService.login(loginInfo);
 
+        if(loginResult.getUsername() == null) {
+            theResponse.status(401);
+        }
+
         Serializer loginSerializer = new Serializer(loginResult);
         return loginSerializer.serialize();
     }
