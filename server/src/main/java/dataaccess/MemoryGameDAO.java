@@ -1,7 +1,6 @@
 package dataaccess;
 
 import chess.ChessGame;
-import model.AuthData;
 import model.GameData;
 
 import java.util.HashMap;
@@ -32,8 +31,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     public GameData[] getAllGames() {
-        HashSet<GameData> games = new HashSet<>();
-        games.addAll(myGameData.values());
+        HashSet<GameData> games = new HashSet<>(myGameData.values());
         
         GameData[] allGames = new GameData[games.size()];
 
@@ -43,8 +41,6 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public void updateGame(String thePlayerColor, String theUsername, GameData theGame)
             throws DataAccessException {
-
-        String newGamePlayer = theUsername;
 
         int gameIDOfUpdatingGame = theGame.gameID();
 
@@ -61,7 +57,7 @@ public class MemoryGameDAO implements GameDAO {
             }
 
             gameToUpdate = new GameData(theGame.gameID(),
-                    theGame.whiteUsername(), newGamePlayer,
+                    theGame.whiteUsername(), theUsername,
                     theGame.gameName(), theGame.game());
         } else {
             if(gameToUpdate.whiteUsername() != null) {
@@ -69,7 +65,7 @@ public class MemoryGameDAO implements GameDAO {
             }
 
             gameToUpdate = new GameData(theGame.gameID(),
-                    newGamePlayer, theGame.blackUsername(),
+                    theUsername, theGame.blackUsername(),
                     theGame.gameName(), theGame.game());
         }
 
