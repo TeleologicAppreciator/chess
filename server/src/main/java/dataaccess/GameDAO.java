@@ -15,4 +15,8 @@ public interface GameDAO extends DataAccess {
 
     public void updateGame(String thePlayerColor, String username, GameData theGame)
             throws DataAccessException;
+
+    public int size();
+
+    public GameData getGameTest(int gameID);
 }

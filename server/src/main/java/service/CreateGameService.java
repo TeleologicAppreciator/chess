@@ -9,7 +9,7 @@ import result.CreateGameResult;
 import result.Result;
 
 public class CreateGameService extends AuthService {
-    private GameDAO myGameData;
+    private final GameDAO myGameData;
 
     public CreateGameService(AuthDAO theAuthData, GameDAO theGameData) {
         super(theAuthData);

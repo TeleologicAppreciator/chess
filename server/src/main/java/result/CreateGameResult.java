@@ -10,4 +10,8 @@ public class CreateGameResult extends Result {
     public CreateGameResult(String theErrorMessage) {
         super(theErrorMessage);
     }
+
+    public int getGameID() {
+        return gameID;
+    }
 }

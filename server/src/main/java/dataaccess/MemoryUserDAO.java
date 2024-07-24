@@ -46,4 +46,8 @@ public class MemoryUserDAO implements UserDAO {
     public void deleteAll(){
         myUserData.clear();
     }
+
+    public int size() {
+        return myUserData.size();
+    }
 }

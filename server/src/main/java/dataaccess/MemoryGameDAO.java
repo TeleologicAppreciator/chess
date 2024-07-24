@@ -96,4 +96,12 @@ public class MemoryGameDAO implements GameDAO {
 
         return resultTeamColor;
     }
+
+    public int size() {
+        return myGameData.size();
+    }
+
+    public GameData getGameTest(int gameID) {
+        return myGameData.get(gameID);
+    }
 }
