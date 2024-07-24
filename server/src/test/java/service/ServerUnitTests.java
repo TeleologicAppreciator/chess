@@ -155,7 +155,7 @@ class ServerUnitTests {
         var loginService = new LoginService(testServer.getUserDatabase(), testServer.getAuthDatabase());
         UserData oldUser = new UserData("test", "test", "test");
 
-        try{
+        try {
             testServer.getUserDatabase().createUser(oldUser);
         } catch (DataAccessException e) {
             //no exceptions ever
@@ -178,7 +178,7 @@ class ServerUnitTests {
     void logoutPositive() {
         UserData oldUser = new UserData("test", "test", "test");
 
-        try{
+        try {
             testServer.getUserDatabase().createUser(oldUser);
         } catch (DataAccessException e) {
             //no exceptions ever
@@ -240,19 +240,30 @@ class ServerUnitTests {
     }
 
     @Test
-    void authServiceUnauthorizedPositive() {
+    void authServiceIsNotAuthorizedPositive() {
         AuthService authService = new AuthService(testServer.getAuthDatabase());
-        var result = authService.unauthorized(makeSureAuthWorks);
+        var result = authService.isNotAuthorized(makeSureAuthWorks.authToken());
 
-        assertNull(result);
+        assertFalse(result);
     }
 
     @Test
-    void authServiceUnauthorizedNegative() {
+    void authServiceIsNotAuthorizedNegative() {
         AuthService authService = new AuthService(testServer.getAuthDatabase());
+        var result = authService.isNotAuthorized("badAuth");
 
-        var result = authService.unauthorized(null);
+        assertTrue(result);
+    }
 
-        assertNotNull(result.getErrorMessage());
+    @Test
+    void authServiceGetAuthDataPositive() {
+        AuthService authService = new AuthService(testServer.getAuthDatabase());
+        assertEquals(authService.getAuthData(), testServer.getAuthDatabase());
+    }
+
+    @Test
+    void authServiceGetAuthDataNegative() {
+        AuthService authService = new AuthService(testServer.getAuthDatabase());
+        assertNotNull(authService.getAuthData());
     }
 }

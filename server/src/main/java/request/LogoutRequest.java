@@ -1,3 +1,3 @@
 package request;
 
-public record LogoutRequest (String myAuthToken) {}
+public record LogoutRequest (String authToken) {}

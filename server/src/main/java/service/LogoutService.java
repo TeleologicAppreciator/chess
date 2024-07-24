@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
 import result.*;
 import model.AuthData;
 import request.LogoutRequest;
@@ -11,15 +12,19 @@ public class LogoutService extends AuthService {
     }
 
     public Result logout(LogoutRequest theLogoutRequest) {
-        AuthData authDataToVerify = userAuthorizedVerification(theLogoutRequest.myAuthToken());
-
-        Result authorizationResult = unauthorized(authDataToVerify);
-
-        if (authorizationResult != null) {
-            return authorizationResult;
+        if (isNotAuthorized(theLogoutRequest.authToken())) {
+            return new Result("Error: unauthorized");
         }
 
-        this.getAuthData().deleteAuth(authDataToVerify);
+        AuthData currentSessionToLogout = null;
+
+        try {
+            currentSessionToLogout = this.getAuthData().getAuth(theLogoutRequest.authToken());
+        } catch (DataAccessException e) {
+            //we have already verified that the user is valid
+        }
+
+        this.getAuthData().deleteAuth(currentSessionToLogout);
 
         return new Result();
     }

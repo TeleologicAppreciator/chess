@@ -77,7 +77,7 @@ public class MemoryGameDAO implements GameDAO {
         myGameData.clear();
     }
 
-    private void incrementGameID(){
+    private void incrementGameID() {
         gameID++;
     }
 

@@ -12,8 +12,8 @@ import result.Result;
 import java.util.UUID;
 
 public class RegisterService {
-    private UserDAO myUserData;
-    private AuthDAO myAuthData;
+    private final UserDAO myUserData;
+    private final AuthDAO myAuthData;
 
     public RegisterService(UserDAO userData, AuthDAO authData) {
         myUserData = userData;

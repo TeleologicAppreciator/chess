@@ -5,7 +5,7 @@ import spark.Request;
 import spark.Response;
 
 public class DeleteAllHandler {
-    private DeleteAllService myDeleteAllService;
+    private final DeleteAllService myDeleteAllService;
 
     public DeleteAllHandler(DeleteAllService theService) {
         myDeleteAllService = theService;

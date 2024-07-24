@@ -2,7 +2,6 @@ package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
-import model.AuthData;
 import request.GetAllGamesRequest;
 import result.Result;
 import result.GetAllGameResult;
@@ -16,12 +15,8 @@ public class GetAllGamesService extends AuthService {
     }
 
     public Result retrieveAllGames(GetAllGamesRequest theGetAllGamesRequest) {
-        AuthData authDataToVerify = userAuthorizedVerification(theGetAllGamesRequest.myAuthToken());
-
-        Result authorizationResult = unauthorized(authDataToVerify);
-
-        if (authorizationResult != null) {
-            return authorizationResult;
+        if (isNotAuthorized(theGetAllGamesRequest.authToken())) {
+            return new Result("Error: unauthorized");
         }
 
         return new GetAllGameResult(myGameData.getAllGames());

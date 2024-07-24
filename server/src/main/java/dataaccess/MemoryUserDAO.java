@@ -43,7 +43,7 @@ public class MemoryUserDAO implements UserDAO {
         return userToReturn;
     }
 
-    public void deleteAll(){
+    public void deleteAll() {
         myUserData.clear();
     }
 

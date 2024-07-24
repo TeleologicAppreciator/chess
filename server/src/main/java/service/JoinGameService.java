@@ -6,11 +6,10 @@ import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
 import request.JoinGameRequest;
-import result.JoinGameResult;
 import result.Result;
 
-public class JoinGameService extends AuthService{
-    private GameDAO myGameData;
+public class JoinGameService extends AuthService {
+    private final GameDAO myGameData;
 
     public JoinGameService(AuthDAO theAuthData, GameDAO theGameData) {
         super(theAuthData);
@@ -18,12 +17,8 @@ public class JoinGameService extends AuthService{
     }
 
     public Result joinGame(JoinGameRequest theJoinGameRequest) {
-        AuthData authDataToVerify = userAuthorizedVerification(theJoinGameRequest.authToken());
-
-        Result authorizationResult = unauthorized(authDataToVerify);
-
-        if (authorizationResult != null) {
-            return authorizationResult;
+        if (isNotAuthorized(theJoinGameRequest.authToken())) {
+            return new Result("Error: unauthorized");
         }
 
         GameData gameToJoin;
@@ -34,9 +29,17 @@ public class JoinGameService extends AuthService{
             return new Result("Error: bad request");
         }
 
+        AuthData needUsername = null;
+
+        try {
+            needUsername = getAuthData().getAuth(theJoinGameRequest.authToken());
+        } catch (DataAccessException e) {
+            //there won't be errors the user is already authorized
+        }
+
         try {
             myGameData.updateGame(
-                    theJoinGameRequest.playerColor(), authDataToVerify.username(), gameToJoin);
+                    theJoinGameRequest.playerColor(), needUsername.username(), gameToJoin);
 
         } catch (DataAccessException e) {
             if(e.getMessage().equals("Invalid player color")) {

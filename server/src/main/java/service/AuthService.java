@@ -3,10 +3,9 @@ package service;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
-import result.Result;
 
 public class AuthService {
-    private AuthDAO myAuthData;
+    private final AuthDAO myAuthData;
 
     public AuthService(AuthDAO theAuthData) {
         myAuthData = theAuthData;
@@ -24,12 +23,9 @@ public class AuthService {
         return userExistsIfAuthorized;
     }
 
-    public Result unauthorized(AuthData theAuthData) {
-        if (theAuthData == null) {
-            return new Result("Error: unauthorized");
-        }
-
-        return null;
+    public boolean isNotAuthorized(String theAuthToken) {
+        AuthData authData = userAuthorizedVerification(theAuthToken);
+        return authData == null;
     }
 
     public AuthDAO getAuthData() {

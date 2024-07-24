@@ -1,3 +1,3 @@
 package request;
 
-public record GetAllGamesRequest(String myAuthToken) {}
+public record GetAllGamesRequest(String authToken) {}

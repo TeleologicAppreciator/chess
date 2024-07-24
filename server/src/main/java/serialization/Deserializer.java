@@ -2,11 +2,9 @@ package serialization;
 
 import com.google.gson.Gson;
 
-import java.lang.reflect.Type;
-
 public class Deserializer {
-    private String myObjectToDeserialize;
-    private Object myTypeOfObjectToDeserialize;
+    private final String myObjectToDeserialize;
+    private final Object myTypeOfObjectToDeserialize;
 
     public Deserializer(String theObjectToDeserialize, Object theTypeOfObjectToDeserialize) {
         myObjectToDeserialize = theObjectToDeserialize;
