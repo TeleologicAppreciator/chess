@@ -1,11 +1,11 @@
 package handler;
 
 import request.LoginRequest;
+import result.Result;
 import serialization.Deserializer;
 import service.LoginService;
 import spark.Request;
 import spark.Response;
-import result.LoginResult;
 
 public class LoginHandler extends Handler {
     private final LoginService myLoginService;
@@ -19,7 +19,7 @@ public class LoginHandler extends Handler {
 
         LoginRequest loginInfo = (LoginRequest) deserializeLoginInfo.deserialize();
 
-        LoginResult loginResult = myLoginService.login(loginInfo);
+        Result loginResult = myLoginService.login(loginInfo);
 
         theResponse.status(getStatusCode(loginResult));
         return getSerializedResult(loginResult);

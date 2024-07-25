@@ -6,8 +6,8 @@ import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 import request.RegisterRequest;
-import result.RegisterResult;
 import result.Result;
+import result.UserResult;
 
 import java.util.UUID;
 
@@ -41,6 +41,6 @@ public class RegisterService {
         AuthData authData = new AuthData(authToken, username);
         myAuthData.createAuth(authData);
 
-        return new RegisterResult(username, authToken);
+        return new UserResult(username, authToken);
     }
 }

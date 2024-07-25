@@ -6,9 +6,9 @@ import service.*;
 import spark.*;
 
 public class Server {
-    private UserDAO myUserDatabase;
-    private AuthDAO myAuthDatabase;
-    private GameDAO myGameDatabase;
+    private final UserDAO myUserDatabase;
+    private final AuthDAO myAuthDatabase;
+    private final GameDAO myGameDatabase;
 
     private final DeleteAllHandler myDeleteAllHandler;
     private final RegisterHandler myRegisterHandler;
@@ -59,29 +59,5 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
-    }
-
-    public UserDAO getUserDatabase() {
-        return myUserDatabase;
-    }
-
-    public AuthDAO getAuthDatabase() {
-        return myAuthDatabase;
-    }
-
-    public GameDAO getGameDatabase() {
-        return myGameDatabase;
-    }
-
-    public void setMyUserDatabase(UserDAO theUserDatabase) {
-        myUserDatabase = theUserDatabase;
-    }
-
-    public void setMyAuthDatabase(AuthDAO theAuthDatabase) {
-        myAuthDatabase = theAuthDatabase;
-    }
-
-    public void setMyGameDatabase(GameDAO theGameDatabase) {
-        myGameDatabase = theGameDatabase;
     }
 }

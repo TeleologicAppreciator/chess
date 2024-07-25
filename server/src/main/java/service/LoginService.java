@@ -6,7 +6,8 @@ import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 import request.LoginRequest;
-import result.LoginResult;
+import result.Result;
+import result.UserResult;
 
 import java.util.UUID;
 
@@ -19,19 +20,19 @@ public class LoginService {
         myAuthData = theAuthData;
     }
 
-    public LoginResult login(LoginRequest theLoginData) {
+    public Result login(LoginRequest theLoginData) {
         UserData userToLogin;
 
         try {
             userToLogin = myUserData.getUser(theLoginData.username(), theLoginData.password());
         } catch (DataAccessException e) {
-            return new LoginResult("Error: unauthorized");
+            return new Result("Error: unauthorized");
         }
 
         String authToken = UUID.randomUUID().toString();
         AuthData newLoginAuthentication = new AuthData(authToken, userToLogin.username());
         myAuthData.createAuth(newLoginAuthentication);
 
-        return new LoginResult(newLoginAuthentication.username(), newLoginAuthentication.authToken());
+        return new UserResult(newLoginAuthentication.username(), newLoginAuthentication.authToken());
     }
 }
