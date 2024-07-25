@@ -23,8 +23,14 @@ public class ChessPiece {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         ChessPiece that = (ChessPiece) o;
         return myTeamColor == that.myTeamColor && myPieceType == that.myPieceType;
     }
@@ -54,7 +60,7 @@ public class ChessPiece {
     }
 
     private String whatCaseForPieceColor(String pieceTypeString) {
-        if(isWhitePiece()){
+        if(isWhitePiece()) {
             return pieceTypeString.toUpperCase();
         }
 

@@ -18,7 +18,7 @@ public class ChessBoard {
         myBoard = new ChessPiece[8][8];
     }
 
-    private ChessPiece[][] getMyBoard(){
+    private ChessPiece[][] getMyBoard() {
         return myBoard;
     }
 
@@ -60,8 +60,14 @@ public class ChessBoard {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o){
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         ChessBoard that = (ChessBoard) o;
         return Objects.deepEquals(getMyBoard(), that.getMyBoard());
     }

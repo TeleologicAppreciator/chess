@@ -54,10 +54,8 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
         if(isNotDiagonalMove(thePiece, theStartPosition, theEndPositionToCheck)) {
             if (theBoard.isInBounds(theEndPositionToCheck) && theBoard.getPiece(theEndPositionToCheck) == null) {
                 if (isNextMovePromotion(thePiece, theStartPosition)) {
-                    thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, ChessPiece.PieceType.QUEEN));
-                    thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, ChessPiece.PieceType.BISHOP));
-                    thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, ChessPiece.PieceType.KNIGHT));
-                    thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, ChessPiece.PieceType.ROOK));
+                    addAllPossiblePromotion(
+                            thePossibleMoves, new ChessMove(theStartPosition, theEndPositionToCheck, null));
                 } else {
                     thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, null));
                 }
@@ -82,15 +80,24 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
             if (theBoard.isInBounds(theEndPositionToCheck) && !(theBoard.getPiece(theEndPositionToCheck) == null)
                     && (!theBoard.getPiece(theEndPositionToCheck).getTeamColor().equals(thePiece.getTeamColor()))) {
                 if (isNextMovePromotion(thePiece, theStartPosition)) {
-                    thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, ChessPiece.PieceType.QUEEN));
-                    thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, ChessPiece.PieceType.BISHOP));
-                    thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, ChessPiece.PieceType.KNIGHT));
-                    thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, ChessPiece.PieceType.ROOK));
+                    addAllPossiblePromotion(
+                            thePossibleMoves, new ChessMove(theStartPosition, theEndPositionToCheck, null));
                 } else {
                     thePossibleMoves.add(new ChessMove(theStartPosition, theEndPositionToCheck, null));
                 }
             }
         }
+    }
+
+    private void addAllPossiblePromotion(Collection<ChessMove> thePossibleMoves, ChessMove theMove) {
+        thePossibleMoves.add(
+                new ChessMove(theMove.getStartPosition(), theMove.getEndPosition(), ChessPiece.PieceType.QUEEN));
+        thePossibleMoves.add(
+                new ChessMove(theMove.getStartPosition(), theMove.getEndPosition(), ChessPiece.PieceType.BISHOP));
+        thePossibleMoves.add(
+                new ChessMove(theMove.getStartPosition(), theMove.getEndPosition(), ChessPiece.PieceType.KNIGHT));
+        thePossibleMoves.add(
+                new ChessMove(theMove.getStartPosition(), theMove.getEndPosition(), ChessPiece.PieceType.ROOK));
     }
 
     private boolean isNotDiagonalMove(ChessPiece thePiece, ChessPosition theStartPosition,

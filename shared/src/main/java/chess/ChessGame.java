@@ -60,7 +60,7 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        if(this.getBoard().getPiece(startPosition) == null){
+        if(this.getBoard().getPiece(startPosition) == null) {
             return null;
         }
 
