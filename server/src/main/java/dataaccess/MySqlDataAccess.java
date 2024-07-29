@@ -17,10 +17,11 @@ public class MySqlDataAccess {
               INDEX(blackUsername),
               INDEX(name)
             ) CREATE TABLE IF NOT EXISTS  user (
+              `id` int NOT NULL AUTO_INCREMENT,
               `username` varchar(256) NOT NULL,
               `password` varchar(256) NOT NULL,
               `email` varchar(256) NOT NULL,
-              PRIMARY KEY (`username`),
+              PRIMARY KEY (`id`),
               INDEX(password)
             ) CREATE TABLE IF NOT EXISTS  auth (
               `authToken` varchar(256) DEFAULT NULL,
@@ -41,6 +42,17 @@ public class MySqlDataAccess {
             }
         } catch (SQLException e) {
             throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
+        }
+    }
+
+    private void addUser(String theUsername, String thePassword, String theEmail) throws DataAccessException, SQLException {
+        String addStatment = "INSERT INTO user (username, password, email) VALUES (theUsername, thePassword, theEmail)";
+        try (var connnection = DatabaseManager.getConnection()) {
+            try (var preparedStatement = connnection.prepareStatement(addStatment)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to add user: %s", e.getMessage()));
         }
     }
 }
