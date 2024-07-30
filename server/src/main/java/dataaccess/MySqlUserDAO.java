@@ -4,7 +4,6 @@ import model.UserData;
 
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class MySqlUserDAO extends MySqlDataAccess implements UserDAO {
 
@@ -25,8 +24,6 @@ public class MySqlUserDAO extends MySqlDataAccess implements UserDAO {
                     preparedStatement.setString(3, theUserData.email());
 
                     preparedStatement.executeUpdate();
-
-                    var resultSet = preparedStatement.getGeneratedKeys();
                 } catch (Exception e) {
                     throw new DataAccessException("Unable to read data");
                 }
@@ -100,14 +97,6 @@ public class MySqlUserDAO extends MySqlDataAccess implements UserDAO {
         } catch (Exception e) {
             throw new DataAccessException("Unable to read data");
         }
-    }
-
-    private boolean isUsernameValid(String username) {
-        return username.matches("[a-zA-Z0-9!?]+");
-    }
-
-    private boolean isPasswordValid(String password) {
-        return isUsernameValid(password);
     }
 
     private boolean isEmailValid(String email) {

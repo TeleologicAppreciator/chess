@@ -16,11 +16,11 @@ public class Handler {
             return 400;
         } else if (errorMessage.equals("Error: unauthorized")) {
             return 401;
-        } else if (errorMessage.equals("Error: Unable to read data")) {
-            return 500;
-        } else {
-            //errorMessage.equals("Error: already taken")
+        } else if (errorMessage.equals("Error: already taken")) {
             return 403;
+        } else {
+            //errorMessage.equals("Error: Unable to read data")
+            return 500;
         }
     }
 

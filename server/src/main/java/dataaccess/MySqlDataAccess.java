@@ -57,9 +57,23 @@ public class MySqlDataAccess {
                     preparedStatement.executeUpdate();
                 }
             }
+
+            for (var statement : createAuthDatabase) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
         } catch (Exception e) {
             throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
         }
+    }
+
+    public boolean isUsernameValid(String username) {
+        return username.matches("[a-zA-Z0-9!?]+");
+    }
+
+    public boolean isPasswordValid(String password) {
+        return isUsernameValid(password);
     }
 
 }
