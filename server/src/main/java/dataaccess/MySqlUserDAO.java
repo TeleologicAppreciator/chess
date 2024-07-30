@@ -58,6 +58,29 @@ public class MySqlUserDAO implements UserDAO {
                 throw new DataAccessException("User not found");
             }
         }
+
+        throw new DataAccessException("Username and password are required");
+    }
+
+    public void deleteAll() {
+        var connection = MySqlDataAccess.getConnection();
+        var preparedStatement = connection.prepareStatement("DROP TABLE user");
+        preparedStatement.executeQuery();
+        connection.close();
+    }
+
+    public int size() {
+        var connection = MySqlDataAccess.getConnection();
+        var preparedStatement = connection.prepareStatement("SELECT username FROM user");
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        int size = 0;
+        while(resultSet.next()){
+            size++;
+        }
+        connection.close();
+
+        return size;
     }
 
     private boolean isUsernameValid(String username) {

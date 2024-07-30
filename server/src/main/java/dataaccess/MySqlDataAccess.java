@@ -1,5 +1,7 @@
 package dataaccess;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class MySqlDataAccess {
@@ -32,6 +34,15 @@ public class MySqlDataAccess {
             """
     };
 
+    public static Connection getConnection() throws DataAccessException, SQLException {
+        try (var connection = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+            return connection;
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to read data");
+        }
+    }
+
     private void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
@@ -44,6 +55,5 @@ public class MySqlDataAccess {
             throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
         }
     }
-
 
 }
