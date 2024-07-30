@@ -24,7 +24,11 @@ public class LogoutService extends AuthService {
             //we have already verified that the user is valid
         }
 
-        this.getAuthData().deleteAuth(currentSessionToLogout);
+        try {
+            this.getAuthData().deleteAuth(currentSessionToLogout);
+        } catch (Exception e) {
+            return new Result("Unable to read data");
+        }
 
         return new Result();
     }

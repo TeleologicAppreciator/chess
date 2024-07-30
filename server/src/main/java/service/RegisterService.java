@@ -39,7 +39,11 @@ public class RegisterService {
         var authToken = UUID.randomUUID().toString();
 
         AuthData authData = new AuthData(authToken, username);
-        myAuthData.createAuth(authData);
+        try {
+            myAuthData.createAuth(authData);
+        } catch (Exception e) {
+            return new Result("Unable to read data");
+        }
 
         return new UserResult(username, authToken);
     }

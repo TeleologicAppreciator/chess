@@ -31,7 +31,12 @@ public class LoginService {
 
         String authToken = UUID.randomUUID().toString();
         AuthData newLoginAuthentication = new AuthData(authToken, userToLogin.username());
-        myAuthData.createAuth(newLoginAuthentication);
+
+        try {
+            myAuthData.createAuth(newLoginAuthentication);
+        } catch (Exception e) {
+            return new Result("Unable to read data");
+        }
 
         return new UserResult(newLoginAuthentication.username(), newLoginAuthentication.authToken());
     }
