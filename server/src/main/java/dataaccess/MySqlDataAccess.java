@@ -45,14 +45,5 @@ public class MySqlDataAccess {
         }
     }
 
-    private void addUser(String theUsername, String thePassword, String theEmail) throws DataAccessException, SQLException {
-        String addStatment = "INSERT INTO user (username, password, email) VALUES (theUsername, thePassword, theEmail)";
-        try (var connnection = DatabaseManager.getConnection()) {
-            try (var preparedStatement = connnection.prepareStatement(addStatment)) {
-                preparedStatement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to add user: %s", e.getMessage()));
-        }
-    }
+
 }
