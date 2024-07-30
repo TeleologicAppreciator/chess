@@ -48,7 +48,11 @@ class ServiceUnitTests {
         assertEquals(gameTestDatabase.size(), 1);
 
         var deleteAllService = new DeleteAllService(userTestDatabase, authTestDatabase, gameTestDatabase);
-        deleteAllService.deleteAllData();
+        try {
+            deleteAllService.deleteAllData();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         assertEquals(userTestDatabase.size(), 0);
         assertEquals(authTestDatabase.size(), 0);

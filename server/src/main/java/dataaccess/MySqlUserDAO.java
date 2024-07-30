@@ -6,81 +6,100 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class MySqlUserDAO implements UserDAO {
+public class MySqlUserDAO extends MySqlDataAccess implements UserDAO {
 
-    public void createUser(UserData theUserData) throws DataAccessException, SQLException {
-        var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!");
-        var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-
-        if(isUsernameValid(theUserData.username()) && isPasswordValid(theUserData.password())
-                && isEmailValid(theUserData.email())) {
-            try (var preparedStatement = connection.prepareStatement(statement)) {
-                preparedStatement.setString(1, theUserData.username());
-                preparedStatement.setString(2, theUserData.password());
-                preparedStatement.setString(3, theUserData.email());
-
-                preparedStatement.executeUpdate();
-
-                var resultSet = preparedStatement.getGeneratedKeys();
-            } catch (SQLException e) {
-                throw new DataAccessException(String.format("Unable to add user: %s", e.getMessage()));
-            }
-        }
+    public MySqlUserDAO() throws DataAccessException {
+        super();
     }
 
-    public UserData getUser(String theUsername, String thePassword) throws DataAccessException, SQLException {
-        var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!");
-        var statement = "SELECT username FROM user WHERE username = ?";
+    public void createUser(UserData theUserData) throws DataAccessException {
+        try (var connection = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+            var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
 
-        if(isUsernameValid(theUsername)) {
-            try (var preparedStatement = connection.prepareStatement(statement)) {
-                preparedStatement.setString(1, theUsername);
+            if (isUsernameValid(theUserData.username()) && isPasswordValid(theUserData.password())
+                    && isEmailValid(theUserData.email())) {
+                try (var preparedStatement = connection.prepareStatement(statement)) {
+                    preparedStatement.setString(1, theUserData.username());
+                    preparedStatement.setString(2, theUserData.password());
+                    preparedStatement.setString(3, theUserData.email());
 
-                ResultSet resultSet = preparedStatement.executeQuery();
+                    preparedStatement.executeUpdate();
 
-                String theUsernameIsTheSame = null;
-                while (resultSet.next()) {
-                    theUsernameIsTheSame = resultSet.getString("username");
-                    if (theUsernameIsTheSame.equals(theUsername)) {
-                        String password = resultSet.getString("password");
-
-                        if(!password.equals(thePassword)){
-                            throw new DataAccessException("Wrong password");
-                        }
-
-                        String email = resultSet.getString("email");
-                        return new UserData(theUsernameIsTheSame, password, email);
-                    }
+                    var resultSet = preparedStatement.getGeneratedKeys();
+                } catch (Exception e) {
+                    throw new DataAccessException("Unable to read data");
                 }
-
-                throw new DataAccessException("User not found");
             }
+        } catch (Exception e) {
+            throw new DataAccessException("Unable to read data");
         }
-
-        throw new DataAccessException("Username and password are required");
     }
 
-    public void deleteAll() {
-        var connection = MySqlDataAccess.getConnection();
-        var preparedStatement = connection.prepareStatement("DROP TABLE user");
-        preparedStatement.executeQuery();
-        connection.close();
+    public UserData getUser(String theUsername, String thePassword) throws DataAccessException {
+        try (var connection = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+            var statement = "SELECT username FROM user WHERE username = ?";
+
+            if (isUsernameValid(theUsername)) {
+                try (var preparedStatement = connection.prepareStatement(statement)) {
+                    preparedStatement.setString(1, theUsername);
+
+                    ResultSet resultSet = preparedStatement.executeQuery();
+
+                    String theUsernameIsTheSame = null;
+                    while (resultSet.next()) {
+                        theUsernameIsTheSame = resultSet.getString("username");
+                        if (theUsernameIsTheSame.equals(theUsername)) {
+                            String password = resultSet.getString("password");
+
+                            if (!password.equals(thePassword)) {
+                                throw new DataAccessException("Wrong password");
+                            }
+
+                            String email = resultSet.getString("email");
+                            return new UserData(theUsernameIsTheSame, password, email);
+                        }
+                    }
+
+                    throw new DataAccessException("User not found");
+                } catch (Exception e) {
+                    throw new DataAccessException("Unable to read data");
+                }
+            }
+
+            throw new DataAccessException("Username and password are required");
+        } catch (Exception e) {
+            throw new DataAccessException("Unable to read data");
+        }
     }
 
-    public int size() {
-        var connection = MySqlDataAccess.getConnection();
-        var preparedStatement = connection.prepareStatement("SELECT username FROM user");
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        int size = 0;
-        while(resultSet.next()){
-            size++;
+    public void deleteAll() throws DataAccessException {
+        try (var connection = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+            var preparedStatement = connection.prepareStatement("DROP TABLE user");
+            preparedStatement.executeQuery();
+        } catch (Exception e) {
+            throw new DataAccessException("Unable to read data");
         }
-        connection.close();
+    }
 
-        return size;
+    public int size() throws DataAccessException {
+        try (var connection = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+            var preparedStatement = connection.prepareStatement("SELECT username FROM user");
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            int size = 0;
+            while (resultSet.next()) {
+                size++;
+            }
+            connection.close();
+
+            return size;
+        } catch (Exception e) {
+            throw new DataAccessException("Unable to read data");
+        }
     }
 
     private boolean isUsernameValid(String username) {

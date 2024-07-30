@@ -9,7 +9,7 @@ import service.*;
 import spark.*;
 
 public class Server {
-    private final UserDAO myUserDatabase;
+    private UserDAO myUserDatabase = null;
     private final AuthDAO myAuthDatabase;
     private final GameDAO myGameDatabase;
 
@@ -23,7 +23,11 @@ public class Server {
 
 
     public Server() {
-        myUserDatabase = new MemoryUserDAO();
+        try {
+            myUserDatabase = new MySqlUserDAO();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         myAuthDatabase = new MemoryAuthDAO();
         myGameDatabase = new MemoryGameDAO();
 
