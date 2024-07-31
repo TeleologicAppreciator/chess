@@ -18,7 +18,7 @@ public class MySqlDataAccess {
             `json` TEXT NOT NULL,
              PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
+        """
     };
 
     private final String[] createUserDatabase = {
@@ -68,11 +68,11 @@ public class MySqlDataAccess {
         }
     }
 
-    public boolean isUsernameValid(String username) {
+    protected boolean isUsernameValid(String username) {
         return username.matches("[a-zA-Z0-9!?]+");
     }
 
-    public boolean isPasswordValid(String password) {
+    protected boolean isPasswordValid(String password) {
         return isUsernameValid(password);
     }
 
