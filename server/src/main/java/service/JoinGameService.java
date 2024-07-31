@@ -38,6 +38,7 @@ public class JoinGameService extends AuthService {
         }
 
         try {
+            assert needUsername != null;
             myGameData.updateGame(
                     theJoinGameRequest.playerColor(), needUsername.username(), gameToJoin);
 

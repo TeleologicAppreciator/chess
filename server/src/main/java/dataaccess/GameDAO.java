@@ -13,6 +13,4 @@ public interface GameDAO extends DataAccess {
             throws DataAccessException;
 
     public int size() throws DataAccessException;
-
-    public GameData getGameTest(int gameID) throws DataAccessException;
 }
