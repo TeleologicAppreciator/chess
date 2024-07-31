@@ -1,9 +1,9 @@
-package dataaccess;
+package dataaccess.mysql;
 
+import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
 import model.AuthData;
-import model.UserData;
 
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 
 public class MySqlAuthDAO extends MySqlDataAccess implements AuthDAO {
@@ -12,8 +12,7 @@ public class MySqlAuthDAO extends MySqlDataAccess implements AuthDAO {
     }
 
     public void createAuth(AuthData theUserData) throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+        try (var connection = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
 
             if (isUsernameValid(theUserData.username())) {
@@ -22,19 +21,16 @@ public class MySqlAuthDAO extends MySqlDataAccess implements AuthDAO {
                     preparedStatement.setString(2, theUserData.username());
 
                     preparedStatement.executeUpdate();
-                } catch (Exception e) {
-                    throw new DataAccessException("Unable to read data");
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
     public AuthData getAuth(String theAuthToken) throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
-            var statement = "SELECT authToken FROM auth WHERE authToken = ?";
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = "SELECT authToken, username FROM auth WHERE authToken = ?";
 
             try (var preparedStatement = connection.prepareStatement(statement)) {
                 preparedStatement.setString(1, theAuthToken);
@@ -53,28 +49,32 @@ public class MySqlAuthDAO extends MySqlDataAccess implements AuthDAO {
                 throw new DataAccessException("Auth token not found");
             }
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
     public void deleteAuth(AuthData theUserData) throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+        try {
+            getAuth(theUserData.authToken());
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+
+        try (var connection = DatabaseManager.getConnection()) {
             var statement = "DELETE FROM auth WHERE authToken = ?";
 
             try (var preparedStatement = connection.prepareStatement(statement)) {
                 preparedStatement.setString(1, theUserData.authToken());
 
-                ResultSet resultSet = preparedStatement.executeQuery();
+                preparedStatement.executeUpdate();
             }
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
     public int size() throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+        try (var connection = DatabaseManager.getConnection()) {
             var preparedStatement = connection.prepareStatement("SELECT authToken FROM auth");
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -86,17 +86,18 @@ public class MySqlAuthDAO extends MySqlDataAccess implements AuthDAO {
 
             return size;
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
     public void deleteAll() throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+        try (var connection = DatabaseManager.getConnection()) {
             var preparedStatement = connection.prepareStatement("DROP TABLE auth");
-            preparedStatement.executeQuery();
+            preparedStatement.executeUpdate();
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
+
+        new MySqlAuthDAO();
     }
 }

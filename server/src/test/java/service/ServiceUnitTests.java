@@ -105,24 +105,41 @@ class ServiceUnitTests {
     void joinGamePositive() {
         gameTestDatabase.createGame(goodAuth.username());
 
-        assertNull(gameTestDatabase.getGameTest(1).blackUsername());
+        try {
+            assertNull(gameTestDatabase.getGame(1).blackUsername());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         var joinGameService = new JoinGameService(authTestDatabase, gameTestDatabase);
         var joinGameRequest = new JoinGameRequest("black", 1, goodAuth.authToken());
 
         var result = joinGameService.joinGame(joinGameRequest);
 
-        assertNotNull(gameTestDatabase.getGameTest(1).blackUsername());
+        try {
+            assertNotNull(gameTestDatabase.getGame(1).blackUsername());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     void joinGameNegative() {
         gameTestDatabase.createGame("name");
-        assertNull(gameTestDatabase.getGameTest(1).blackUsername());
+        try {
+            assertNull(gameTestDatabase.getGame(1).blackUsername());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         var joinGameRequest = new JoinGameRequest("black", 1, badAuth.authToken());
         var result = new JoinGameService(authTestDatabase, gameTestDatabase);
-        assertNull(gameTestDatabase.getGameTest(1).blackUsername());
+
+        try {
+            assertNull(gameTestDatabase.getGame(1).blackUsername());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

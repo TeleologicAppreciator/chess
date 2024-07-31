@@ -31,6 +31,8 @@ public class RegisterService {
                 return new Result("Error: already taken");
             } else if (e.getMessage().equals("Username and password are required")) {
                 return new Result("Error: bad request");
+            } else {
+                return new Result("Error: " + e.getMessage());
             }
         }
 

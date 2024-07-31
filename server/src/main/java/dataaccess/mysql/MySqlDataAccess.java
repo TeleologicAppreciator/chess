@@ -1,6 +1,6 @@
-package dataaccess;
+package dataaccess.mysql;
 
-import java.sql.SQLException;
+import dataaccess.DataAccessException;
 
 public class MySqlDataAccess {
 
@@ -25,7 +25,7 @@ public class MySqlDataAccess {
         """
         CREATE TABLE IF NOT EXISTS  user (
           `id` INT NOT NULL AUTO_INCREMENT,
-           `username` varchar(256) NOT NULL,
+           `username` varchar(256) NOT NULL UNIQUE,
            `password` varchar(256) NOT NULL,
            `email` varchar(256) NOT NULL,
            PRIMARY KEY (`id`)

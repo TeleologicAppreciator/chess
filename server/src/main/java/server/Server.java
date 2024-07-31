@@ -1,17 +1,17 @@
 package server;
 
 import dataaccess.*;
-import dataaccess.memory.MemoryAuthDAO;
-import dataaccess.memory.MemoryGameDAO;
-import dataaccess.memory.MemoryUserDAO;
+import dataaccess.mysql.MySqlAuthDAO;
+import dataaccess.mysql.MySqlGameDAO;
+import dataaccess.mysql.MySqlUserDAO;
 import handler.*;
 import service.*;
 import spark.*;
 
 public class Server {
     private UserDAO myUserDatabase = null;
-    private final AuthDAO myAuthDatabase;
-    private final GameDAO myGameDatabase;
+    private AuthDAO myAuthDatabase = null;
+    private GameDAO myGameDatabase = null;
 
     private final DeleteAllHandler myDeleteAllHandler;
     private final RegisterHandler myRegisterHandler;
@@ -28,8 +28,18 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        myAuthDatabase = new MemoryAuthDAO();
-        myGameDatabase = new MemoryGameDAO();
+
+        try {
+            myAuthDatabase = new MySqlAuthDAO();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            myGameDatabase = new MySqlGameDAO();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         myDeleteAllHandler = new DeleteAllHandler(
                 new DeleteAllService(myUserDatabase, myAuthDatabase, myGameDatabase));

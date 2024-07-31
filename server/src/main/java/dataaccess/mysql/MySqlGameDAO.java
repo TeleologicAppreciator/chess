@@ -1,6 +1,8 @@
-package dataaccess;
+package dataaccess.mysql;
 
 import chess.ChessGame;
+import dataaccess.DataAccessException;
+import dataaccess.GameDAO;
 import model.GameData;
 import serialization.Deserializer;
 import serialization.Serializer;
@@ -14,8 +16,7 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
     }
 
     public GameData createGame(String theGameName) throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+        try (var connection = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO game (whiteUsername, blackUsername, name, json) VALUES (?, ?, ?, ?)";
 
             try (var preparedStatement = connection.prepareStatement(statement)) {
@@ -35,14 +36,13 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
             }
 
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
     public GameData getGame(int theGameID) throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
-            var statement = "SELECT id FROM game WHERE id = ?";
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, whiteUsername, blackUsername, name, json FROM game WHERE id = ?";
 
             try (var preparedStatement = connection.prepareStatement(statement)) {
                 preparedStatement.setString(1, Integer.toString(theGameID));
@@ -66,7 +66,7 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
                 throw new DataAccessException("Game not found");
             }
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
@@ -76,12 +76,11 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
         try {
             allGamesResult = new GameData[size()];
         } catch (Exception e) {
-            throw new DataAccessException("unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
 
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
-            var statement = "SELECT id FROM game";
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, whiteUsername, blackUsername, name, json FROM game";
 
             try (var preparedStatement = connection.prepareStatement(statement)) {
                 ResultSet resultSet = preparedStatement.executeQuery();
@@ -102,7 +101,7 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
 
                 return allGamesResult;
             } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
@@ -118,10 +117,9 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
         //getGame throws exception if there is no game found
         GameData theGameToCompare = getGame(theGame.gameID());
 
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+        try (var connection = DatabaseManager.getConnection()) {
 
-            var statement = "SELECT id FROM game WHERE id = ?";
+            var statement = "SELECT id, whiteUsername, blackUsername FROM game WHERE id = ?";
             try (var preparedStatement = connection.prepareStatement(statement)) {
                 ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -135,30 +133,28 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
                             newPreparedStatement.setString(1, username);
                             newPreparedStatement.executeUpdate();
                         }
-
+                    }
+                } else {
+                    String black = resultSet.getString("blackUsername");
+                    if (black != null) {
+                        throw new DataAccessException("Black username already exists");
                     } else {
-                        String black = resultSet.getString("blackUsername");
-                        if (black != null) {
-                            throw new DataAccessException("Black username already exists");
-                        } else {
-                            var newStatement = "INSERT INTO game (blackUsername) VALUES (?)";
-                            try (var newPreparedStatement = connection.prepareStatement(newStatement)) {
-                                newPreparedStatement.setString(1, username);
-                                newPreparedStatement.executeUpdate();
-                            }
-
+                        var newStatement = "INSERT INTO game (blackUsername) VALUES (?)";
+                        try (var newPreparedStatement = connection.prepareStatement(newStatement)) {
+                            newPreparedStatement.setString(1, username);
+                            newPreparedStatement.executeUpdate();
                         }
+
                     }
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
     public int size() throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+        try (var connection = DatabaseManager.getConnection()) {
             var statement = "SELECT id FROM game";
 
             int i = 0;
@@ -173,17 +169,18 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
 
             return i;
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
     public void deleteAll() throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
+        try (var connection = DatabaseManager.getConnection()) {
             var preparedStatement = connection.prepareStatement("DROP TABLE game");
-            preparedStatement.executeQuery();
+            preparedStatement.executeUpdate();
         } catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
+
+        new MySqlAuthDAO();
     }
 }

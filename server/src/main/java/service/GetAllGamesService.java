@@ -19,6 +19,14 @@ public class GetAllGamesService extends AuthService {
             return new Result("Error: unauthorized");
         }
 
-        return new GetAllGameResult(myGameData.getAllGames());
+        GetAllGameResult result = null;
+
+        try {
+            result = new GetAllGameResult(myGameData.getAllGames());
+        } catch (Exception e) {
+            return new Result("Unable to get data");
+        }
+
+        return result;
     }
 }

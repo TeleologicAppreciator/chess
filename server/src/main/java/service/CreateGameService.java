@@ -20,7 +20,13 @@ public class CreateGameService extends AuthService {
             return new Result("Error: unauthorized");
         }
 
-        GameData newGame = myGameData.createGame(theCreateGameRequest.gameName());
+        GameData newGame = null;
+
+        try {
+            newGame = myGameData.createGame(theCreateGameRequest.gameName());
+        } catch (Exception e) {
+            return new Result("Error: unable to read data");
+        }
 
         return new CreateGameResult(newGame.gameID());
     }
