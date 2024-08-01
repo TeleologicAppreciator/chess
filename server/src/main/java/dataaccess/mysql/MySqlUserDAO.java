@@ -29,7 +29,7 @@ public class MySqlUserDAO extends MySqlDataAccess implements UserDAO {
         }
     }
 
-    public UserData getUser(String theUsername, String thePassword) throws DataAccessException {
+    public UserData getUser(String theUsername) throws DataAccessException {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = "SELECT username, password, email FROM user WHERE username = ?";
                 try (var preparedStatement = connection.prepareStatement(statement)) {

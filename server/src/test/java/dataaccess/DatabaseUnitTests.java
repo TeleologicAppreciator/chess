@@ -142,7 +142,7 @@ public class DatabaseUnitTests {
     @Test
     void createUserPositive() throws DataAccessException {
         assertDoesNotThrow(() -> userTestDatabase.createUser(testUser));
-        assertEquals(userTestDatabase.getUser(testUser.username(), testUser.password()), testUser);
+        assertEquals(userTestDatabase.getUser(testUser.username()), testUser);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class DatabaseUnitTests {
 
     @Test
     void getUserNegative() throws DataAccessException {
-        assertThrows(DataAccessException.class, () -> userTestDatabase.getUser(testUser.username(), testUser.password()));
+        assertThrows(DataAccessException.class, () -> userTestDatabase.getUser(testUser.username()));
     }
 
     @Test

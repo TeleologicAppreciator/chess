@@ -4,6 +4,7 @@ import dataaccess.AuthDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import request.RegisterRequest;
 import result.Result;
 import result.UserResult;
@@ -24,13 +25,15 @@ public class RegisterService {
             return new Result("Error: bad request");
         }
 
+        String hashedPassword = BCrypt.hashpw(theUserLoginData.password(), BCrypt.gensalt());
+
         UserData registerData = new UserData(
-                theUserLoginData.username(), theUserLoginData.password(), theUserLoginData.email());
+                theUserLoginData.username(), hashedPassword, theUserLoginData.email());
 
         UserData checkToSeeIfUserIsTaken = null;
 
         try {
-            checkToSeeIfUserIsTaken = myUserData.getUser(theUserLoginData.username(), theUserLoginData.password());
+            checkToSeeIfUserIsTaken = myUserData.getUser(theUserLoginData.username());
         } catch (Exception e) {
             if (e.getMessage().equals("User not found")) {
                 try {
