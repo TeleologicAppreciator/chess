@@ -1,7 +1,6 @@
 package service;
 
 import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
@@ -21,19 +20,31 @@ public class RegisterService {
     }
 
     public Result registerUser(RegisterRequest theUserLoginData) {
+        if (!isUsernameValid(theUserLoginData.username()) || !isPasswordValid(theUserLoginData.password())) {
+            return new Result("Error: bad request");
+        }
+
         UserData registerData = new UserData(
                 theUserLoginData.username(), theUserLoginData.password(), theUserLoginData.email());
 
+        UserData checkToSeeIfUserIsTaken = null;
+
         try {
-            myUserData.createUser(registerData);
-        } catch (DataAccessException e) {
-            if (e.getMessage().equals("User already exists")) {
-                return new Result("Error: already taken");
-            } else if (e.getMessage().equals("Username and password are required")) {
-                return new Result("Error: bad request");
+            checkToSeeIfUserIsTaken = myUserData.getUser(theUserLoginData.username(), theUserLoginData.password());
+        } catch (Exception e) {
+            if (e.getMessage().equals("User not found")) {
+                try {
+                    myUserData.createUser(registerData);
+                } catch (Exception e1) {
+                    return new Result("Error: " + e.getMessage());
+                }
             } else {
                 return new Result("Error: " + e.getMessage());
             }
+        }
+
+        if (checkToSeeIfUserIsTaken != null) {
+            return new Result("Error: already taken");
         }
 
         String username = registerData.username();
@@ -48,5 +59,13 @@ public class RegisterService {
         }
 
         return new UserResult(username, authToken);
+    }
+
+    private boolean isUsernameValid(String username) {
+        return username != null && username.matches("[a-zA-Z0-9!?]+");
+    }
+
+    private boolean isPasswordValid(String password) {
+        return isUsernameValid(password);
     }
 }

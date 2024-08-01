@@ -29,6 +29,10 @@ public class LoginService {
             return new Result("Error: unauthorized");
         }
 
+        if(!userToLogin.password().equals(theLoginData.password())) {
+            return new Result("Error: unauthorized");
+        }
+
         String authToken = UUID.randomUUID().toString();
         AuthData newLoginAuthentication = new AuthData(authToken, userToLogin.username());
 

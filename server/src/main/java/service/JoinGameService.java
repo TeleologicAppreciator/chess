@@ -17,16 +17,25 @@ public class JoinGameService extends AuthService {
     }
 
     public Result joinGame(JoinGameRequest theJoinGameRequest) {
-        if (isNotAuthorized(theJoinGameRequest.authToken())) {
+        if(isNotAuthorized(theJoinGameRequest.authToken())) {
             return new Result("Error: unauthorized");
+        }
+
+        if(theJoinGameRequest.playerColor() == null) {
+            return new Result("Error: bad request");
         }
 
         GameData gameToJoin;
 
         try {
             gameToJoin = myGameData.getGame(theJoinGameRequest.gameID());
-        } catch (DataAccessException e) {
+        } catch(DataAccessException e) {
             return new Result("Error: bad request");
+        }
+
+        if(theJoinGameRequest.playerColor().equalsIgnoreCase("white") && gameToJoin.whiteUsername() != null ||
+                theJoinGameRequest.playerColor().equalsIgnoreCase("black") && gameToJoin.blackUsername() != null) {
+            return new Result("Error: already taken");
         }
 
         AuthData needUsername = null;
@@ -34,19 +43,18 @@ public class JoinGameService extends AuthService {
         try {
             needUsername = getAuthData().getAuth(theJoinGameRequest.authToken());
         } catch (DataAccessException e) {
-            //there won't be errors the user is already authorized
+            //the user is already authorized, only database errors possible
+            return new Result(e.getMessage());
         }
 
         try {
-            assert needUsername != null;
             myGameData.updateGame(
                     theJoinGameRequest.playerColor(), needUsername.username(), gameToJoin);
-
-        } catch (DataAccessException e) {
+        } catch(DataAccessException e) {
             if(e.getMessage().equals("Invalid player color")) {
                 return new Result("Error: bad request");
             } else {
-                return new Result("Error: already taken");
+                return new Result(e.getMessage());
             }
         }
 

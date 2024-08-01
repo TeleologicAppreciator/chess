@@ -9,7 +9,7 @@ public class MySqlDataAccess {
     }
 
     private final String[] createGameDatabase = {
-        """
+            """
         CREATE TABLE IF NOT EXISTS  game (
             `id` INT NOT NULL AUTO_INCREMENT,
             `whiteUsername` varchar(256) DEFAULT NULL,
@@ -22,7 +22,7 @@ public class MySqlDataAccess {
     };
 
     private final String[] createUserDatabase = {
-        """
+            """
         CREATE TABLE IF NOT EXISTS  user (
           `id` INT NOT NULL AUTO_INCREMENT,
            `username` varchar(256) NOT NULL UNIQUE,
@@ -34,7 +34,7 @@ public class MySqlDataAccess {
     };
 
     private final String[] createAuthDatabase = {
-        """
+            """
         CREATE TABLE IF NOT EXISTS  auth (
           `authToken` varchar(256) NOT NULL,
           `username` varchar(256) NOT NULL,
@@ -67,13 +67,4 @@ public class MySqlDataAccess {
             throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
         }
     }
-
-    protected boolean isUsernameValid(String username) {
-        return username.matches("[a-zA-Z0-9!?]+");
-    }
-
-    protected boolean isPasswordValid(String password) {
-        return isUsernameValid(password);
-    }
-
 }

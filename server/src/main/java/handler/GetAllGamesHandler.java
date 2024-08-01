@@ -15,7 +15,7 @@ public class GetAllGamesHandler extends Handler{
     public Object getAllGames(Request theRequest, Response theResponse) {
         var getAllGamesRequest = new GetAllGamesRequest(theRequest.headers("Authorization"));
 
-        var getAllGamesResult = myGetAllGamesService.retrieveAllGames(getAllGamesRequest);
+        var getAllGamesResult = myGetAllGamesService.getAllGames(getAllGamesRequest);
 
         theResponse.status(getStatusCode(getAllGamesResult));
         return getSerializedResult(getAllGamesResult);

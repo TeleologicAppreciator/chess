@@ -7,8 +7,6 @@ public interface GameDAO extends DataAccess {
 
     public GameData getGame(int theGameID) throws DataAccessException;
 
-    public GameData[] getAllGames() throws DataAccessException;
-
     public void updateGame(String thePlayerColor, String username, GameData theGame)
             throws DataAccessException;
 

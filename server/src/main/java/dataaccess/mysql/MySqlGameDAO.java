@@ -7,8 +7,8 @@ import model.GameData;
 import serialization.Deserializer;
 import serialization.Serializer;
 
-import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
     public MySqlGameDAO() throws DataAccessException {
@@ -19,7 +19,7 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO game (whiteUsername, blackUsername, name, json) VALUES (?, ?, ?, ?)";
 
-            try (var preparedStatement = connection.prepareStatement(statement)) {
+            try (var preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 ChessGame game = new ChessGame();
 
                 preparedStatement.setString(1, null); //white username
@@ -29,10 +29,14 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
 
                 preparedStatement.executeUpdate();
 
-                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-                int gameID = generatedKeys.getInt(1);
-
-                return new GameData(gameID, null, null, theGameName, game);
+                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {  // Move to the first row
+                        int gameID = generatedKeys.getInt(1);
+                        return new GameData(gameID, null, null, theGameName, game);
+                    } else {
+                        throw new DataAccessException("No ID obtained.");
+                    }
+                }
             }
 
         } catch (Exception e) {
@@ -57,7 +61,7 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
                         String black = resultSet.getString("blackUsername");
                         String name = resultSet.getString("name");
                         ChessGame game = (ChessGame)
-                                new Deserializer(resultSet.getString("json"), ChessGame.class).deserialize();
+                                new Deserializer(resultSet.getString("json"), new ChessGame()).deserialize();
 
                         return new GameData(theGameID, white, black, name, game);
                     }
@@ -70,83 +74,22 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
         }
     }
 
-    public GameData[] getAllGames() throws DataAccessException {
-        GameData[] allGamesResult = null;
-
-        try {
-            allGamesResult = new GameData[size()];
-        } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
-        }
-
-        try (var connection = DatabaseManager.getConnection()) {
-            var statement = "SELECT id, whiteUsername, blackUsername, name, json FROM game";
-
-            try (var preparedStatement = connection.prepareStatement(statement)) {
-                ResultSet resultSet = preparedStatement.executeQuery();
-
-                int i = 0;
-                while (resultSet.next()) {
-                    int gameID = Integer.parseInt(resultSet.getString("id"));
-                    String white = resultSet.getString("whiteUsername");
-                    String black = resultSet.getString("blackUsername");
-                    String name = resultSet.getString("name");
-                    ChessGame game = (ChessGame)
-                            new Deserializer(resultSet.getString("json"), ChessGame.class).deserialize();
-
-                    allGamesResult[i] = new GameData(gameID, white, black, name, game);
-                    i++;
-                    }
-                }
-
-                return allGamesResult;
-            } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
-        }
-    }
-
     public void updateGame(String thePlayerColor, String username, GameData theGame) throws DataAccessException {
-        if(thePlayerColor == null) {
-            throw new DataAccessException("Invalid player color");
-        }
-
-        if(!(thePlayerColor.equalsIgnoreCase("white") || thePlayerColor.equalsIgnoreCase("black"))) {
-            throw new DataAccessException("Invalid player color");
-        }
-
-        //getGame throws exception if there is no game found
         GameData theGameToCompare = getGame(theGame.gameID());
 
         try (var connection = DatabaseManager.getConnection()) {
+            String statement;
+            if (thePlayerColor.equalsIgnoreCase("white")) {
+                statement = "UPDATE game SET whiteUsername = ? WHERE id = ?";
+            } else {
+                statement = "UPDATE game SET blackUsername = ? WHERE id = ?";
+            }
 
-            var statement = "SELECT id, whiteUsername, blackUsername FROM game WHERE id = ?";
             try (var preparedStatement = connection.prepareStatement(statement)) {
-                ResultSet resultSet = preparedStatement.executeQuery();
+                preparedStatement.setString(1, username);
+                preparedStatement.setInt(2, theGame.gameID());
 
-                if(thePlayerColor.equalsIgnoreCase("white")) {
-                    String white = resultSet.getString("whiteUsername");
-                    if (white != null) {
-                        throw new DataAccessException("White username already exists");
-                    } else {
-                        var newStatement = "INSERT INTO game (whiteUsername) VALUES (?)";
-                        try (var newPreparedStatement = connection.prepareStatement(newStatement)) {
-                            newPreparedStatement.setString(1, username);
-                            newPreparedStatement.executeUpdate();
-                        }
-                    }
-                } else {
-                    String black = resultSet.getString("blackUsername");
-                    if (black != null) {
-                        throw new DataAccessException("Black username already exists");
-                    } else {
-                        var newStatement = "INSERT INTO game (blackUsername) VALUES (?)";
-                        try (var newPreparedStatement = connection.prepareStatement(newStatement)) {
-                            newPreparedStatement.setString(1, username);
-                            newPreparedStatement.executeUpdate();
-                        }
-
-                    }
-                }
+                preparedStatement.executeUpdate();
             }
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());

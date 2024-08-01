@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.*;
+import dataaccess.mysql.DatabaseManager;
 
 import java.sql.DriverManager;
 
@@ -16,16 +17,9 @@ public class DeleteAllService {
     }
 
     public void deleteAllData() throws DataAccessException {
-        try (var connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/mydb", "root", "Mypasswordformysqlserver50!")) {
-            deleteAllUsers();
-            deleteAllAuth();
-            deleteAllGames();
-        }
-        catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
-        }
-
+        deleteAllUsers();
+        deleteAllAuth();
+        deleteAllGames();
     }
 
     private void deleteAllUsers() throws DataAccessException {

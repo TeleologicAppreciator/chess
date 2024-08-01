@@ -15,14 +15,13 @@ public class MySqlAuthDAO extends MySqlDataAccess implements AuthDAO {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
 
-            if (isUsernameValid(theUserData.username())) {
-                try (var preparedStatement = connection.prepareStatement(statement)) {
-                    preparedStatement.setString(1, theUserData.authToken());
-                    preparedStatement.setString(2, theUserData.username());
+            try (var preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, theUserData.authToken());
+                preparedStatement.setString(2, theUserData.username());
 
-                    preparedStatement.executeUpdate();
-                }
+                preparedStatement.executeUpdate();
             }
+
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
@@ -82,7 +81,6 @@ public class MySqlAuthDAO extends MySqlDataAccess implements AuthDAO {
             while (resultSet.next()) {
                 size++;
             }
-            connection.close();
 
             return size;
         } catch (Exception e) {

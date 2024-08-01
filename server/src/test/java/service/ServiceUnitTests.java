@@ -34,7 +34,7 @@ class ServiceUnitTests {
         badAuth = new AuthData("badAuthToken", "badAuthUsername");
         authTestDatabase.createAuth(goodAuth);
 
-        testUser = new UserData("test", "test", "test");
+        testUser = new UserData("test", "test", "test@test.com");
     }
 
     @Test
@@ -88,7 +88,7 @@ class ServiceUnitTests {
         var getAllGamesService = new GetAllGamesService(authTestDatabase, gameTestDatabase);
 
         var getAllGamesRequest = new GetAllGamesRequest(goodAuth.authToken());
-        var result = getAllGamesService.retrieveAllGames(getAllGamesRequest);
+        var result = getAllGamesService.getAllGames(getAllGamesRequest);
 
         assertNull(result.getErrorMessage());
     }
@@ -96,7 +96,7 @@ class ServiceUnitTests {
     @Test
     void getAllGamesNegative() {
         var getAllGamesRequest = new GetAllGamesRequest(badAuth.authToken());
-        var result = new GetAllGamesService(authTestDatabase, gameTestDatabase).retrieveAllGames(getAllGamesRequest);
+        var result = new GetAllGamesService(authTestDatabase, gameTestDatabase).getAllGames(getAllGamesRequest);
 
         assertNotNull(result.getErrorMessage());
     }
