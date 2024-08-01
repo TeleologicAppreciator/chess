@@ -241,9 +241,9 @@ public class DatabaseUnitTests {
     @Test
     void gameSizePositive() throws DataAccessException {
         assertEquals(gameTestDatabase.size(), 0);
-        String gameName = "gameName";
-        assertDoesNotThrow(() -> gameTestDatabase.createGame(gameName));
-        assertEquals(gameTestDatabase.size(), 1);
+        assertDoesNotThrow(() -> gameTestDatabase.createGame("funGame"));
+        assertDoesNotThrow(() -> gameTestDatabase.createGame("reallyFunGame"));
+        assertEquals(gameTestDatabase.size(), 2);
     }
 
     @Test
