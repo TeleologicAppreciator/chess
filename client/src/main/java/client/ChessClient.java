@@ -3,6 +3,7 @@ package client;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
+import model.JoinData;
 import model.UserData;
 import server.ServerFacade;
 
@@ -42,8 +43,15 @@ public class ChessClient {
         return "Successfully created game: " + theGameName;
     }
 
-    public String joinGame(int gameID, String playerColor) throws DataAccessException {
-        server.joinGame();
+    public String joinGame(int theGameID, String thePlayerColor) throws DataAccessException {
+        JoinData dataOfGameToJoin = new JoinData(thePlayerColor, gameData[theGameID - 1].gameID());
+        try {
+            server.joinGame(dataOfGameToJoin, authData);
+        } catch (DataAccessException e) {
+            return "Error joining game: " + dataOfGameToJoin;
+        }
+
+        return "Successfully joined game: " + dataOfGameToJoin;
     }
 
     public String list() throws DataAccessException {
