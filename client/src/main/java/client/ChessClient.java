@@ -54,6 +54,12 @@ public class ChessClient {
         return "Successfully joined game: " + dataOfGameToJoin;
     }
 
+    public String observe(int theGameID) throws DataAccessException {
+        JoinData dataOfGameToObserve = new JoinData(null, gameData[theGameID - 1].gameID());
+        //observe functionality to be implemented in the future.
+        return "functionality to be added in future update";
+    }
+
     public String list() throws DataAccessException {
         GameData[] listOfAllGames = server.getAllGames(authData);
         gameData = listOfAllGames;
