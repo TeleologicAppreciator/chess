@@ -9,7 +9,6 @@ public class Repl {
         client = new ChessClient(serverUrl);
     }
 
-    /*
     public void run() {
         System.out.println("\uD83D\uDC36 Welcome to 240 Chess, please login to start");
         System.out.print(client.help());
@@ -39,5 +38,5 @@ public class Repl {
     private void printPrompt() {
         System.out.print("\n" + RESET + ">>> " + GREEN);
     }
-    */
+    
 }

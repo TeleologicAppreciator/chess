@@ -142,9 +142,11 @@ public class ChessClient {
         return constructedListOFAllGames.toString();
     }
 
-    public void logout() throws DataAccessException {
+    public String logout() throws DataAccessException {
         state = State.SIGNEDOUT;
         authData = null;
+
+        return "Successfully logged out";
     }
 
     public String help() {
