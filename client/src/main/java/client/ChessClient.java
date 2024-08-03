@@ -7,6 +7,8 @@ import model.JoinData;
 import model.UserData;
 import server.ServerFacade;
 
+import java.util.Arrays;
+
 public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
@@ -20,31 +22,86 @@ public class ChessClient {
         serverUrl = theServerUrl;
     }
 
-    public String register(String theUsername, String thePassword, String theEmail) throws DataAccessException {
+    public String eval(String input) {
+        try {
+            var tokens = input.toLowerCase().split(" ");
+            var cmd = (tokens.length > 0) ? tokens[0] : "help";
+            var params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "login" -> login(params);
+                case "list" -> listGames();
+                case "create" -> createGame(params);
+                case "join" -> joinGame(params);
+                case "observe" -> observe(params);
+                case "logout" -> logout();
+                case "register" -> register(params);
+                case "quit" -> "quit";
+                default -> help();
+            };
+        } catch (DataAccessException e) {
+            return e.getMessage();
+        }
+    }
+
+    public String register(String... params) throws DataAccessException {
         state = State.SIGNEDIN;
-        UserData userRegistrationData = new UserData(theUsername, thePassword, theEmail);
+
+        String username = null;
+        String password = null;
+        String email = null;
+        if (params.length > 2) {
+            username = params[0];
+            password = params[1];
+            email = params[2];
+        } else {
+            throw new DataAccessException("You must specify at least 3 parameters to register");
+        }
+        UserData userRegistrationData = new UserData(username, password, email);
 
         authData = server.registerUser(userRegistrationData);
         return String.format("Successfully registered user %s", userRegistrationData);
     }
 
-    public String login(String theUsername, String thePassword) throws DataAccessException {
+    public String login(String... params) throws DataAccessException {
             state = State.SIGNEDIN;
-            UserData userToLogin = new UserData(theUsername, thePassword, null);
+
+            String username = null;
+            String password = null;
+            if (params.length > 1) {
+                username = params[0];
+                password = params[1];
+            } else {
+                throw new DataAccessException("You must specify at least 2 parameters to login");
+            }
+            UserData userToLogin = new UserData(username, password, null);
 
             authData = server.loginUser(userToLogin);
             return String.format("Welcome %s", userToLogin.username());
     }
 
-    public String create(String theGameName) throws DataAccessException {
-        //the server does not grab the gameID int value
-        server.createGame(new GameData(Integer.MIN_VALUE, null, null, theGameName, null), authData);
+    public String createGame(String... params) throws DataAccessException {
+        String gameName = null;
+        if (params.length > 0) {
+            gameName = params[0];
+        } else {
+            throw new DataAccessException("You must specify the game name to make a game");
+        }        //the server does not grab the gameID int value
+        server.createGame(new GameData(Integer.MIN_VALUE, null, null, gameName, null), authData);
 
-        return "Successfully created game: " + theGameName;
+        return "Successfully created game: " + gameName;
     }
 
-    public String joinGame(int theGameID, String thePlayerColor) throws DataAccessException {
-        JoinData dataOfGameToJoin = new JoinData(thePlayerColor, gameData[theGameID - 1].gameID());
+    public String joinGame(String... params) throws DataAccessException {
+        Integer gameID = null;
+        String playerColor = null;
+        if (params.length > 1) {
+            gameID = Integer.parseInt(params[0]);
+            playerColor = params[1];
+        } else {
+            throw new DataAccessException("Input invalid please make sure you enter valid gameID from the list");
+        }
+
+        JoinData dataOfGameToJoin = new JoinData(playerColor, gameData[gameID - 1].gameID());
         try {
             server.joinGame(dataOfGameToJoin, authData);
         } catch (DataAccessException e) {
@@ -54,13 +111,19 @@ public class ChessClient {
         return "Successfully joined game: " + dataOfGameToJoin;
     }
 
-    public String observe(int theGameID) throws DataAccessException {
-        JoinData dataOfGameToObserve = new JoinData(null, gameData[theGameID - 1].gameID());
+    public String observe(String... params) throws DataAccessException {
+        Integer gameID = null;
+        if (params.length > 0) {
+            gameID = Integer.parseInt(params[0]);
+        } else {
+            throw new DataAccessException("Input invalid please make sure you enter valid gameID from the list");
+        }
+        JoinData dataOfGameToObserve = new JoinData(null, gameData[gameID - 1].gameID());
         //observe functionality to be implemented in the future.
         return "functionality to be added in future update";
     }
 
-    public String list() throws DataAccessException {
+    public String listGames() throws DataAccessException {
         GameData[] listOfAllGames = server.getAllGames(authData);
         gameData = listOfAllGames;
         StringBuilder constructedListOFAllGames = new StringBuilder();
@@ -84,10 +147,6 @@ public class ChessClient {
         authData = null;
     }
 
-    public void quit() {
-        System.exit(0);
-    }
-
     public String help() {
         if (state == State.SIGNEDIN) {
             return """
@@ -106,6 +165,6 @@ public class ChessClient {
                quit - playing chess
                help - with possible commands
                """;
-        }
     }
 }
+
