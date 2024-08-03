@@ -18,46 +18,47 @@ public class ServerFacade {
         serverUrl = theUrl;
     }
 
-    public AuthData registerUser (UserData theRegisteringUser) throws Exception {
+    public AuthData registerUser (UserData theRegisteringUser) throws DataAccessException {
         var path = "/user";
         return this.makeRequest("POST", path, theRegisteringUser, AuthData.class, null);
     }
 
-    public AuthData loginUser (UserData theLoggingInUser) throws Exception {
+    public AuthData loginUser (UserData theLoggingInUser) throws DataAccessException {
         var path = "/session";
         return this.makeRequest("POST", path, theLoggingInUser, AuthData.class, null);
     }
 
-    public void logoutUser (AuthData theLogoutAuth) throws Exception {
+    public void logoutUser (AuthData theLogoutAuth) throws DataAccessException {
         var path = "/session";
         this.makeRequest("DELETE", path, null, null, theLogoutAuth);
     }
 
-    public GameData[] getAllGames(AuthData theGetAllGamesAuth) throws Exception {
+    public GameData[] getAllGames(AuthData theGetAllGamesAuth) throws DataAccessException {
         var path = "/game";
         record listGameResponse(GameData[] game) {
         }
+
         var response = makeRequest("GET", path, null, listGameResponse.class, theGetAllGamesAuth);
         return response.game();
     }
 
-    public Integer createGame(GameData theGameName, AuthData theCreateGameAuth) throws Exception {
+    public Integer createGame(GameData theGameName, AuthData theCreateGameAuth) throws DataAccessException {
         var path = "/game";
         return this.makeRequest("POST", path, theGameName, Integer.class, theCreateGameAuth);
     }
 
-    public void joinGame(JoinData theJoiningPlayer, AuthData theJoiningGameAuth) throws Exception {
+    public void joinGame(JoinData theJoiningPlayer, AuthData theJoiningGameAuth) throws DataAccessException {
         var path = "/game";
         this.makeRequest("PUT", path, theJoiningPlayer, null, theJoiningGameAuth);
     }
 
-    public void deleteAll() throws Exception {
+    public void deleteAll() throws DataAccessException {
         var path = "/db";
         this.makeRequest("DELETE", path, null, null, null);
     }
 
     private <T, U> U makeRequest(String theMethod, String thePath, T theRequest, Class<U> theResponseClass,
-                              AuthData theAuthData) throws Exception {
+                              AuthData theAuthData) throws DataAccessException {
         try {
             URL url = (new URI(serverUrl + thePath)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -70,7 +71,7 @@ public class ServerFacade {
             throwIfNotSuccessful(http);
             return readBody(http, theResponseClass);
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new DataAccessException(e.getMessage());
         }
 
 
