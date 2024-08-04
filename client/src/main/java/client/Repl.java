@@ -21,22 +21,18 @@ public class Repl {
 
             try {
                 result = client.eval(line);
-                System.out.print(BLUE + result);
+                System.out.print(result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
             }
         }
         System.out.println();
-    }
-
-    public void notify(Notification notification) {
-        System.out.println(RED + notification.message());
-        printPrompt();
+        System.exit(0);
     }
 
     private void printPrompt() {
-        System.out.print("\n" + RESET + ">>> " + GREEN);
+        System.out.print("\n[" + client.getLoginState() + "] >>> ");
     }
     
 }
