@@ -1,4 +1,4 @@
-package result;
+package server.result;
 
 import model.GameData;
 
@@ -11,6 +11,10 @@ public class GetAllGameResult extends Result {
 
     public GetAllGameResult(String theErrorMessage) {
         super(theErrorMessage);
+    }
+
+    public GameData[] games() {
+        return games;
     }
 
 }

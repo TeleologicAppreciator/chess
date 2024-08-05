@@ -5,8 +5,8 @@ import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
-import request.JoinGameRequest;
-import result.Result;
+import server.request.JoinGameRequest;
+import server.result.Result;
 
 public class JoinGameService extends AuthService {
     private final GameDAO myGameData;

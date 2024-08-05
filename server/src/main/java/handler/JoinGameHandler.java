@@ -1,8 +1,8 @@
 package handler;
 
-import request.JoinGameRequest;
-import result.Result;
-import serialization.Deserializer;
+import com.google.gson.Gson;
+import server.request.JoinGameRequest;
+import server.result.Result;
 import service.JoinGameService;
 import spark.Request;
 import spark.Response;
@@ -15,14 +15,12 @@ public class JoinGameHandler extends Handler {
     }
 
     public Object joinGame(Request theRequest, Response theResponse) {
-        var deserializeJoinGameRequest = new Deserializer(theRequest.body(), new JoinGameRequest("", 1, ""));
-
-        JoinGameRequest joinGameRequest = (JoinGameRequest) deserializeJoinGameRequest.deserialize();
+        JoinGameRequest joinGameRequest = new Gson().fromJson(theRequest.body(), JoinGameRequest.class);
         joinGameRequest.setAuthToken(theRequest.headers("Authorization"));
 
         Result joinGameResult = myJoinGameService.joinGame(joinGameRequest);
 
         theResponse.status(getStatusCode(joinGameResult));
-        return getSerializedResult(joinGameResult);
+        return new Gson().toJson(joinGameResult);
     }
 }

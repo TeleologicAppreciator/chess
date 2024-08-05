@@ -1,4 +1,4 @@
-package result;
+package server.result;
 
 public class UserResult extends Result {
     String username;

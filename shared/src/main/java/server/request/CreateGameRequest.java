@@ -1,11 +1,10 @@
-package request;
+package server.request;
 
 public class CreateGameRequest {
     private String authToken;
     private final String gameName;
 
-    public CreateGameRequest(String theAuthToken, String theGameName) {
-        authToken = theAuthToken;
+    public CreateGameRequest(String theGameName) {
         gameName = theGameName;
     }
 

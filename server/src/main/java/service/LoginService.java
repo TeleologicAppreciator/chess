@@ -6,9 +6,9 @@ import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
-import request.LoginRequest;
-import result.Result;
-import result.UserResult;
+import server.request.LoginRequest;
+import server.result.Result;
+import server.result.UserResult;
 
 import java.util.UUID;
 

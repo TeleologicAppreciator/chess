@@ -6,7 +6,12 @@ import model.AuthData;
 import model.GameData;
 import model.JoinData;
 import model.UserData;
-import serialization.Serializer;
+import server.request.CreateGameRequest;
+import server.request.JoinGameRequest;
+import server.request.LoginRequest;
+import server.request.RegisterRequest;
+import server.result.CreateGameResult;
+import server.result.GetAllGameResult;
 
 import java.io.*;
 import java.net.*;
@@ -20,11 +25,15 @@ public class ServerFacade {
 
     public AuthData registerUser (UserData theRegisteringUser) throws DataAccessException {
         var path = "/user";
-        return this.makeRequest("POST", path, theRegisteringUser, AuthData.class, null);
+        RegisterRequest registeringUser = new RegisterRequest(
+                theRegisteringUser.username(), theRegisteringUser.password(), theRegisteringUser.email());
+
+        return this.makeRequest("POST", path, registeringUser, AuthData.class, null);
     }
 
     public AuthData loginUser (UserData theLoggingInUser) throws DataAccessException {
         var path = "/session";
+
         return this.makeRequest("POST", path, theLoggingInUser, AuthData.class, null);
     }
 
@@ -35,20 +44,20 @@ public class ServerFacade {
 
     public GameData[] getAllGames(AuthData theGetAllGamesAuth) throws DataAccessException {
         var path = "/game";
-        record listGameResponse(GameData[] games) {
-        }
-
-        var response = makeRequest("GET", path, null, listGameResponse.class, theGetAllGamesAuth);
+        var response = makeRequest("GET", path, null, GetAllGameResult.class, theGetAllGamesAuth);
         return response.games();
     }
 
     public Integer createGame(GameData theGameName, AuthData theCreateGameAuth) throws DataAccessException {
         var path = "/game";
-        return this.makeRequest("POST", path, theGameName, Integer.class, theCreateGameAuth);
+        CreateGameRequest newRequest = new CreateGameRequest(theGameName.gameName());
+        var result = this.makeRequest("POST", path, newRequest, CreateGameResult.class, theCreateGameAuth);
+        return result.getGameID();
     }
 
     public void joinGame(JoinData theJoiningPlayer, AuthData theJoiningGameAuth) throws DataAccessException {
         var path = "/game";
+        JoinGameRequest joinNew = new JoinGameRequest(theJoiningPlayer.playerColor(), theJoiningPlayer.gameID());
         this.makeRequest("PUT", path, theJoiningPlayer, null, theJoiningGameAuth);
     }
 
@@ -78,16 +87,13 @@ public class ServerFacade {
     private static  void writeAuthorization(AuthData theAuthData, HttpURLConnection http) throws IOException {
         if(theAuthData != null) {
             http.addRequestProperty("Authorization", theAuthData.authToken());
-            try (OutputStream reqBody = http.getOutputStream()) {
-                reqBody.write(theAuthData.authToken().getBytes());
-            }
         }
     }
 
     private static void writeBody(Object request, HttpURLConnection http) throws IOException {
         if (request != null) {
             http.addRequestProperty("Content-Type", "application/json");
-            String reqData = new Serializer(request).serialize();
+            String reqData = new Gson().toJson(request);
             try (OutputStream reqBody = http.getOutputStream()) {
                 reqBody.write(reqData.getBytes());
             }

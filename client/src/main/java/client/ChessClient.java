@@ -86,7 +86,7 @@ public class ChessClient {
         } else {
             throw new DataAccessException("You must specify the game name to make a game");
         }        //the server does not grab the gameID int value
-        server.createGame(new GameData(Integer.MIN_VALUE, null, null, gameName, null), authData);
+        server.createGame(new GameData(0, null, null, gameName, null), authData);
 
         return "Successfully created game: " + gameName;
     }

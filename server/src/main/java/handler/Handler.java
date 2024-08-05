@@ -1,7 +1,6 @@
 package handler;
 
-import result.Result;
-import serialization.Serializer;
+import server.result.Result;
 
 public class Handler {
 
@@ -22,10 +21,5 @@ public class Handler {
             //errorMessage.equals("Error: Unable to read data")
             return 500;
         }
-    }
-
-    public String getSerializedResult (Result theResult) {
-        Serializer serializer = new Serializer(theResult);
-        return serializer.serialize();
     }
 }

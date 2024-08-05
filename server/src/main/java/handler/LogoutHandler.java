@@ -1,7 +1,8 @@
 package handler;
 
-import request.LogoutRequest;
-import result.Result;
+import com.google.gson.Gson;
+import server.request.LogoutRequest;
+import server.result.Result;
 import service.LogoutService;
 import spark.Request;
 import spark.Response;
@@ -19,6 +20,6 @@ public class LogoutHandler extends Handler {
         Result logoutResult = myLogoutService.logout(logoutRequest);
 
         theResponse.status(getStatusCode(logoutResult));
-        return getSerializedResult(logoutResult);
+        return new Gson().toJson(logoutRequest);
     }
 }

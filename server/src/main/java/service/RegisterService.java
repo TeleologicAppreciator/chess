@@ -5,9 +5,9 @@ import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
-import request.RegisterRequest;
-import result.Result;
-import result.UserResult;
+import server.request.RegisterRequest;
+import server.result.Result;
+import server.result.UserResult;
 
 import java.util.UUID;
 
@@ -21,8 +21,7 @@ public class RegisterService {
     }
 
     public Result registerUser(RegisterRequest theUserLoginData) {
-        if (theUserLoginData == null ||
-                !isUsernameValid(theUserLoginData.username()) || !isPasswordValid(theUserLoginData.password())) {
+        if (!isUsernameValid(theUserLoginData.username()) || !isPasswordValid(theUserLoginData.password())) {
             return new Result("Error: bad request");
         }
 

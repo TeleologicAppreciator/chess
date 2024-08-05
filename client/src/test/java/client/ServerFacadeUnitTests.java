@@ -1,3 +1,5 @@
+package java.client;
+
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
@@ -9,7 +11,7 @@ import server.ServerFacade;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ServerFacadeTest {
+public class ServerFacadeUnitTests {
     private static ServerFacade serverFacade;
     private static Server server;
 

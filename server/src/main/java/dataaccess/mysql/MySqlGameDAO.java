@@ -1,11 +1,10 @@
 package dataaccess.mysql;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.GameData;
-import serialization.Deserializer;
-import serialization.Serializer;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -25,7 +24,7 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
                 preparedStatement.setString(1, null); //white username
                 preparedStatement.setString(2, null); //black username
                 preparedStatement.setString(3, theGameName);
-                preparedStatement.setString(4, new Serializer(game).serialize());
+                preparedStatement.setString(4, new Gson().toJson(new ChessGame()));
 
                 preparedStatement.executeUpdate();
 
@@ -61,7 +60,7 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
                         String black = resultSet.getString("blackUsername");
                         String name = resultSet.getString("name");
                         ChessGame game = (ChessGame)
-                                new Deserializer(resultSet.getString("json"), new ChessGame()).deserialize();
+                                new Gson().fromJson(resultSet.getString("json"), ChessGame.class);
 
                         return new GameData(theGameID, white, black, name, game);
                     }

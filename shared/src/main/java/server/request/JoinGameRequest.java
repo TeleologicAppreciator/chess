@@ -1,4 +1,4 @@
-package request;
+package server.request;
 
 import chess.ChessGame;
 
@@ -7,10 +7,9 @@ public class JoinGameRequest {
     private int gameID;
     private String authToken;
 
-    public JoinGameRequest(String thePlayerColor, int theGameID, String theAuthToken) {
+    public JoinGameRequest(String thePlayerColor, int theGameID) {
         playerColor = thePlayerColor;
         gameID = theGameID;
-        authToken = theAuthToken;
     }
 
     public String playerColor() {

@@ -1,6 +1,6 @@
 package handler;
 
-import result.Result;
+import server.result.Result;
 import service.DeleteAllService;
 import spark.Request;
 import spark.Response;
@@ -17,7 +17,7 @@ public class DeleteAllHandler extends Handler {
             myDeleteAllService.deleteAllData();
         } catch (Exception e) {
             theResponse.status(500);
-            getSerializedResult(new Result("\"message\": \"Error: " + e.getMessage() + "\""));
+            return new Result("\"message\": \"Error: " + e.getMessage() + "\"");
         }
 
         theResponse.status(200);

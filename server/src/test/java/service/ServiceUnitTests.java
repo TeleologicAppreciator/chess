@@ -7,10 +7,11 @@ import dataaccess.memory.MemoryUserDAO;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import request.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
+import server.request.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,7 +35,9 @@ class ServiceUnitTests {
         badAuth = new AuthData("badAuthToken", "badAuthUsername");
         authTestDatabase.createAuth(goodAuth);
 
-        testUser = new UserData("test", "test", "test@test.com");
+        String hashedPassword = BCrypt.hashpw("test", BCrypt.gensalt());
+
+        testUser = new UserData("test", hashedPassword, "test@test.com");
     }
 
     @Test
@@ -63,7 +66,7 @@ class ServiceUnitTests {
     void createGamePositive() {
         var createGameService = new CreateGameService(authTestDatabase, gameTestDatabase);
 
-        CreateGameRequest createGameRequest = new CreateGameRequest(goodAuth.authToken(), goodAuth.username());
+        CreateGameRequest createGameRequest = new CreateGameRequest(goodAuth.username());
         var result = assertDoesNotThrow(() -> createGameService.createGame(createGameRequest));
 
         ChessGame equalsForTheTest = assertDoesNotThrow(() -> gameTestDatabase.getGame(1).game());
@@ -76,7 +79,7 @@ class ServiceUnitTests {
 
     @Test
     void createGameNegative() {
-        CreateGameRequest createGameRequest = new CreateGameRequest(badAuth.authToken(), badAuth.username());
+        CreateGameRequest createGameRequest = new CreateGameRequest(badAuth.username());
 
         var result = new CreateGameService(authTestDatabase, gameTestDatabase).createGame(createGameRequest);
 
@@ -112,7 +115,7 @@ class ServiceUnitTests {
         }
 
         var joinGameService = new JoinGameService(authTestDatabase, gameTestDatabase);
-        var joinGameRequest = new JoinGameRequest("black", 1, goodAuth.authToken());
+        var joinGameRequest = new JoinGameRequest("black", 1);
 
         var result = joinGameService.joinGame(joinGameRequest);
 
@@ -132,7 +135,7 @@ class ServiceUnitTests {
             e.printStackTrace();
         }
 
-        var joinGameRequest = new JoinGameRequest("black", 1, badAuth.authToken());
+        var joinGameRequest = new JoinGameRequest("black", 1);
         var result = new JoinGameService(authTestDatabase, gameTestDatabase);
 
         try {
@@ -148,7 +151,7 @@ class ServiceUnitTests {
 
         assertDoesNotThrow(() -> userTestDatabase.createUser(testUser));
 
-        var loginRequest = new LoginRequest(testUser.username(), testUser.password());
+        var loginRequest = new LoginRequest(testUser.username(), "test");
         var result = loginService.login(loginRequest);
 
         assertNull(result.getErrorMessage());

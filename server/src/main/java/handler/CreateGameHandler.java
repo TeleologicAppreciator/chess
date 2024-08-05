@@ -1,8 +1,8 @@
 package handler;
 
-import request.CreateGameRequest;
-import result.Result;
-import serialization.Deserializer;
+import com.google.gson.Gson;
+import server.request.CreateGameRequest;
+import server.result.Result;
 import service.CreateGameService;
 import spark.Request;
 import spark.Response;
@@ -15,13 +15,12 @@ public class CreateGameHandler extends Handler {
     }
 
     public Object createGame(Request theRequest, Response theResponse) {
-        var deserializeCreateGameRequest = new Deserializer(theRequest.body(), new CreateGameRequest("", ""));
-        CreateGameRequest createGameRequest = (CreateGameRequest) deserializeCreateGameRequest.deserialize();
-        createGameRequest.setAuthToken(theRequest.headers("Authorization"));
+        var gameRequest = new Gson().fromJson(theRequest.body(), CreateGameRequest.class);
+        gameRequest.setAuthToken(theRequest.headers("Authorization"));
 
-        Result createGameResult = myCreateGameService.createGame(createGameRequest);
+        Result createGameResult = myCreateGameService.createGame(gameRequest);
 
         theResponse.status(this.getStatusCode(createGameResult));
-        return getSerializedResult(createGameResult);
+        return new Gson().toJson(createGameResult);
     }
 }

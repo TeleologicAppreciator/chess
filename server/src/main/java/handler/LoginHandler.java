@@ -1,8 +1,8 @@
 package handler;
 
-import request.LoginRequest;
-import result.Result;
-import serialization.Deserializer;
+import com.google.gson.Gson;
+import server.request.LoginRequest;
+import server.result.Result;
 import service.LoginService;
 import spark.Request;
 import spark.Response;
@@ -15,13 +15,11 @@ public class LoginHandler extends Handler {
     }
 
     public Object login(Request theRequest, Response theResponse) {
-        var deserializeLoginInfo = new Deserializer(theRequest.body(), new LoginRequest("", ""));
+        LoginRequest loginRequest = new Gson().fromJson(theRequest.body(), LoginRequest.class);
 
-        LoginRequest loginInfo = (LoginRequest) deserializeLoginInfo.deserialize();
-
-        Result loginResult = myLoginService.login(loginInfo);
+        Result loginResult = myLoginService.login(loginRequest);
 
         theResponse.status(getStatusCode(loginResult));
-        return getSerializedResult(loginResult);
+        return new Gson().toJson(loginResult);
     }
 }
