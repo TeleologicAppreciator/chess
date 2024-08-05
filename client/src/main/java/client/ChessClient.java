@@ -40,12 +40,12 @@ public class ChessClient {
                 case "quit" -> "quit";
                 default -> help();
             };
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             return clientErrorMessage(e.getMessage(), cmd);
         }
     }
 
-    public String register(String... params) throws DataAccessException {
+    public String register(String... params) throws Exception {
         String username = null;
         String password = null;
         String email = null;
@@ -63,7 +63,7 @@ public class ChessClient {
         return String.format("Successfully registered user: %s", username);
     }
 
-    public String login(String... params) throws DataAccessException {
+    public String login(String... params) throws Exception {
         String username = null;
         String password = null;
         if (params.length > 1) {
@@ -79,7 +79,7 @@ public class ChessClient {
         return String.format("Welcome %s", userToLogin.username());
     }
 
-    public String createGame(String... params) throws DataAccessException {
+    public String createGame(String... params) throws Exception {
         String gameName = null;
         if (params.length > 0) {
             gameName = params[0];
@@ -91,30 +91,30 @@ public class ChessClient {
         return "Successfully created game: " + gameName;
     }
 
-    public String joinGame(String... params) throws DataAccessException {
-        return drawChessBoard(null);
-        /*
+    public String joinGame(String... params) throws Exception {
+        //return drawChessBoard(null);
         Integer gameID = null;
         String playerColor = null;
         if (params.length > 1) {
             gameID = Integer.parseInt(params[0]);
             playerColor = params[1];
         } else {
-            throw new DataAccessException("Input invalid please make sure you enter valid game ID from the list");
+            throw new Exception("Input invalid please make sure you enter valid game ID from the list");
         }
 
         JoinData dataOfGameToJoin = new JoinData(playerColor, clientListedGameData[gameID - 1].gameID());
         try {
             server.joinGame(dataOfGameToJoin, authData);
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             return "Error joining game: " + dataOfGameToJoin;
         }
 
-        return drawChessBoard();
-         */
+        //return drawChessBoard();
+
+        return "successfully joined game";
     }
 
-    public String observe(String... params) throws DataAccessException {
+    public String observe(String... params) throws Exception {
         Integer gameID = null;
         if (params.length > 0) {
             gameID = Integer.parseInt(params[0]);
@@ -126,7 +126,7 @@ public class ChessClient {
         return drawChessBoard(null);
     }
 
-    public String listGames() throws DataAccessException {
+    public String listGames() throws Exception {
         GameData[] listOfAllGames = server.getAllGames(authData);
         clientListedGameData = listOfAllGames;
         StringBuilder constructedListOFAllGames = new StringBuilder();
@@ -134,11 +134,23 @@ public class ChessClient {
         for (int i = 0; i < listOfAllGames.length; i++) {
             constructedListOFAllGames.append((i+1));
             constructedListOFAllGames.append(") ");
+            constructedListOFAllGames.append("Game name: ");
             constructedListOFAllGames.append(listOfAllGames[i].gameName());
-            constructedListOFAllGames.append(". White: ");
-            constructedListOFAllGames.append(listOfAllGames[i].whiteUsername());
-            constructedListOFAllGames.append(", Black: ");
-            constructedListOFAllGames.append(listOfAllGames[i].blackUsername());
+            constructedListOFAllGames.append(". White player: ");
+            if(listOfAllGames[i].whiteUsername() == null) {
+                constructedListOFAllGames.append("-empty-");
+            } else {
+                constructedListOFAllGames.append(listOfAllGames[i].whiteUsername());
+            }
+
+            constructedListOFAllGames.append("  Black player: ");
+            if(listOfAllGames[i].blackUsername() == null) {
+                constructedListOFAllGames.append("-empty-");
+            } else {
+                constructedListOFAllGames.append(listOfAllGames[i].blackUsername());
+
+            }
+
             constructedListOFAllGames.append("\n");
         }
 
@@ -147,7 +159,7 @@ public class ChessClient {
 
     }
 
-    public String logout() throws DataAccessException {
+    public String logout() throws Exception {
         state = State.SIGNEDOUT;
         authData = null;
 
@@ -174,7 +186,7 @@ public class ChessClient {
                """;
     }
 
-    private String drawChessBoard(ChessBoard trheBoard) {
+    private String drawChessBoard(ChessBoard theBoard) {
         System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
         for(int i = 0; i < 10; i++) {
             System.out.print(EscapeSequences.EMPTY);
@@ -190,40 +202,38 @@ public class ChessClient {
     }
 
     private String clientErrorMessage(String errorMessage, String inputType) {
-        //String error500 = "internal server error";
-
         return switch (inputType) {
             case "login" -> {
-                if (errorMessage.equals("failure 401")) {
+                if (errorMessage.contains("401")) {
                     yield "username or password are incorrect";
                 }
                 yield errorMessage;
             }
             case "list", "logout" -> {
-                if (errorMessage.equals("failure 401")) {
+                if (errorMessage.contains("401")) {
                     yield "unauthorized";
                 }
                 yield errorMessage;
             }
             case "create" -> switch (errorMessage) {
-                case "failure 400" -> "invalid game name";
-                case "failure 401" -> "unauthorized";
+                case "failure: 400" -> "invalid game name";
+                case "failure: 401" -> "unauthorized";
                 default -> errorMessage;
             };
             case "join" -> switch (errorMessage) {
-                case "failure 400" -> "not a valid game ID";
-                case "failure 401" -> "unauthorized";
+                case "failure: 400" -> "not a valid game ID";
+                case "failure: 401" -> "unauthorized";
                 case "failure: 403" -> "player color already taken";
                 default -> errorMessage;
             };
             case "observe" -> {
-                if (errorMessage.equals("failure 400")) {
+                if (errorMessage.contains("400")) {
                     yield "not a valid game ID";
                 }
                 yield errorMessage;
             }
             case "register" -> switch (errorMessage) {
-                case "failure 400" -> "not a valid username or password";
+                case "failure: 400" -> "not a valid username or password";
                 case "failure: 403" -> "username already taken";
                 default -> errorMessage;
             };

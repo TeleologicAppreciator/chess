@@ -1,11 +1,9 @@
 package server.request;
 
-import chess.ChessGame;
-
 public class JoinGameRequest {
     private String playerColor;
     private int gameID;
-    private String authToken;
+    private String authToken = null;
 
     public JoinGameRequest(String thePlayerColor, int theGameID) {
         playerColor = thePlayerColor;

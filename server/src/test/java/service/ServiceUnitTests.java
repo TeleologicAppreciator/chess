@@ -41,7 +41,7 @@ class ServiceUnitTests {
     }
 
     @Test
-    void deleteAllPositive() {
+    void deleteAllPositive() throws Exception {
         assertDoesNotThrow(() -> userTestDatabase.createUser(testUser));
 
         gameTestDatabase.createGame("name");
@@ -51,11 +51,8 @@ class ServiceUnitTests {
         assertEquals(gameTestDatabase.size(), 1);
 
         var deleteAllService = new DeleteAllService(userTestDatabase, authTestDatabase, gameTestDatabase);
-        try {
-            deleteAllService.deleteAllData();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        deleteAllService.deleteAllData();
 
         assertEquals(userTestDatabase.size(), 0);
         assertEquals(authTestDatabase.size(), 0);
@@ -63,13 +60,14 @@ class ServiceUnitTests {
     }
 
     @Test
-    void createGamePositive() {
+    void createGamePositive() throws Exception {
         var createGameService = new CreateGameService(authTestDatabase, gameTestDatabase);
 
         CreateGameRequest createGameRequest = new CreateGameRequest(goodAuth.username());
+        createGameRequest.setAuthToken(goodAuth.authToken());
         var result = assertDoesNotThrow(() -> createGameService.createGame(createGameRequest));
 
-        ChessGame equalsForTheTest = assertDoesNotThrow(() -> gameTestDatabase.getGame(1).game());
+        ChessGame equalsForTheTest = gameTestDatabase.getGame(1).game();
 
         var newGame = new GameData(1, null, null, goodAuth.username(), equalsForTheTest);
         var gameFromDatabase = assertDoesNotThrow(() -> gameTestDatabase.getGame(1));
@@ -105,44 +103,30 @@ class ServiceUnitTests {
     }
 
     @Test
-    void joinGamePositive() {
+    void joinGamePositive() throws Exception {
         gameTestDatabase.createGame(goodAuth.username());
 
-        try {
-            assertNull(gameTestDatabase.getGame(1).blackUsername());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        assertNull(gameTestDatabase.getGame(1).blackUsername());
 
         var joinGameService = new JoinGameService(authTestDatabase, gameTestDatabase);
         var joinGameRequest = new JoinGameRequest("black", 1);
+        joinGameRequest.setAuthToken(goodAuth.authToken());
 
         var result = joinGameService.joinGame(joinGameRequest);
 
-        try {
-            assertNotNull(gameTestDatabase.getGame(1).blackUsername());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        assertNotNull(gameTestDatabase.getGame(1).blackUsername());
     }
 
     @Test
-    void joinGameNegative() {
+    void joinGameNegative() throws Exception {
         gameTestDatabase.createGame("name");
-        try {
-            assertNull(gameTestDatabase.getGame(1).blackUsername());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        assertNull(gameTestDatabase.getGame(1).blackUsername());
 
         var joinGameRequest = new JoinGameRequest("black", 1);
         var result = new JoinGameService(authTestDatabase, gameTestDatabase);
 
-        try {
-            assertNull(gameTestDatabase.getGame(1).blackUsername());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        assertNull(gameTestDatabase.getGame(1).blackUsername());
     }
 
     @Test

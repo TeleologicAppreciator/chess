@@ -8,7 +8,6 @@ import model.JoinData;
 import model.UserData;
 import server.request.CreateGameRequest;
 import server.request.JoinGameRequest;
-import server.request.LoginRequest;
 import server.request.RegisterRequest;
 import server.result.CreateGameResult;
 import server.result.GetAllGameResult;
@@ -23,7 +22,7 @@ public class ServerFacade {
         serverUrl = theUrl;
     }
 
-    public AuthData registerUser (UserData theRegisteringUser) throws DataAccessException {
+    public AuthData registerUser (UserData theRegisteringUser) throws Exception {
         var path = "/user";
         RegisterRequest registeringUser = new RegisterRequest(
                 theRegisteringUser.username(), theRegisteringUser.password(), theRegisteringUser.email());
@@ -31,43 +30,43 @@ public class ServerFacade {
         return this.makeRequest("POST", path, registeringUser, AuthData.class, null);
     }
 
-    public AuthData loginUser (UserData theLoggingInUser) throws DataAccessException {
+    public AuthData loginUser (UserData theLoggingInUser) throws Exception {
         var path = "/session";
 
         return this.makeRequest("POST", path, theLoggingInUser, AuthData.class, null);
     }
 
-    public void logoutUser (AuthData theLogoutAuth) throws DataAccessException {
+    public void logoutUser (AuthData theLogoutAuth) throws Exception {
         var path = "/session";
         this.makeRequest("DELETE", path, null, null, theLogoutAuth);
     }
 
-    public GameData[] getAllGames(AuthData theGetAllGamesAuth) throws DataAccessException {
+    public GameData[] getAllGames(AuthData theGetAllGamesAuth) throws Exception {
         var path = "/game";
         var response = makeRequest("GET", path, null, GetAllGameResult.class, theGetAllGamesAuth);
         return response.games();
     }
 
-    public Integer createGame(GameData theGameName, AuthData theCreateGameAuth) throws DataAccessException {
+    public Integer createGame(GameData theGameName, AuthData theCreateGameAuth) throws Exception {
         var path = "/game";
         CreateGameRequest newRequest = new CreateGameRequest(theGameName.gameName());
         var result = this.makeRequest("POST", path, newRequest, CreateGameResult.class, theCreateGameAuth);
         return result.getGameID();
     }
 
-    public void joinGame(JoinData theJoiningPlayer, AuthData theJoiningGameAuth) throws DataAccessException {
+    public void joinGame(JoinData theJoiningPlayer, AuthData theJoiningGameAuth) throws Exception {
         var path = "/game";
-        JoinGameRequest joinNew = new JoinGameRequest(theJoiningPlayer.playerColor(), theJoiningPlayer.gameID());
-        this.makeRequest("PUT", path, theJoiningPlayer, null, theJoiningGameAuth);
+        JoinGameRequest joinRequest = new JoinGameRequest(theJoiningPlayer.playerColor(), theJoiningPlayer.gameID());
+        this.makeRequest("PUT", path, joinRequest, null, theJoiningGameAuth);
     }
 
-    public void deleteAll() throws DataAccessException {
+    public void deleteAll() throws Exception {
         var path = "/db";
         this.makeRequest("DELETE", path, null, null, null);
     }
 
     private <T, U> U makeRequest(String theMethod, String thePath, T theRequest, Class<U> theResponseClass,
-                              AuthData theAuthData) throws DataAccessException {
+                              AuthData theAuthData) throws Exception {
         try {
             URL url = (new URI(serverUrl + thePath)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -100,10 +99,10 @@ public class ServerFacade {
         }
     }
 
-    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, DataAccessException {
+    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, Exception {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            throw new DataAccessException("failure: " + status);
+            throw new Exception("failure: " + status);
         }
     }
 

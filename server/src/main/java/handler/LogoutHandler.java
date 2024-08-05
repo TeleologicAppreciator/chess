@@ -20,6 +20,6 @@ public class LogoutHandler extends Handler {
         Result logoutResult = myLogoutService.logout(logoutRequest);
 
         theResponse.status(getStatusCode(logoutResult));
-        return new Gson().toJson(logoutRequest);
+        return new Gson().toJson(logoutResult);
     }
 }

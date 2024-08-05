@@ -21,7 +21,7 @@ public class RegisterService {
     }
 
     public Result registerUser(RegisterRequest theUserLoginData) {
-        if (!isUsernameValid(theUserLoginData.username()) || !isPasswordValid(theUserLoginData.password())) {
+        if (theUserLoginData == null || !isUsernameValid(theUserLoginData.username()) || theUserLoginData.password() == null) {
             return new Result("Error: bad request");
         }
 
@@ -66,9 +66,5 @@ public class RegisterService {
 
     private boolean isUsernameValid(String username) {
         return username != null && username.matches("[a-zA-Z0-9!?]+");
-    }
-
-    private boolean isPasswordValid(String password) {
-        return isUsernameValid(password);
     }
 }
