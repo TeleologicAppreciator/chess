@@ -15,7 +15,7 @@ public class ChessClient {
     private String visitorName = null;
     private State state = State.SIGNEDOUT;
     private AuthData authData = null;
-    private GameData[] gameData = null;
+    private GameData[] clientListedGameData = null;
 
     public ChessClient(String theServerUrl) {
         server = new ServerFacade(theServerUrl);
@@ -100,14 +100,13 @@ public class ChessClient {
             throw new DataAccessException("Input invalid please make sure you enter valid game ID from the list");
         }
 
-        JoinData dataOfGameToJoin = new JoinData(playerColor, gameData[gameID - 1].gameID());
+        JoinData dataOfGameToJoin = new JoinData(playerColor, clientListedGameData[gameID - 1].gameID());
         try {
             server.joinGame(dataOfGameToJoin, authData);
         } catch (DataAccessException e) {
             return "Error joining game: " + dataOfGameToJoin;
         }
 
-        //return "Successfully joined game: " + dataOfGameToJoin;
         return drawChessBoard();
     }
 
@@ -118,14 +117,14 @@ public class ChessClient {
         } else {
             throw new DataAccessException("Input invalid please make sure you enter valid game ID from the list");
         }
-        JoinData dataOfGameToObserve = new JoinData(null, gameData[gameID - 1].gameID());
+        JoinData dataOfGameToObserve = new JoinData(null, clientListedGameData[gameID - 1].gameID());
 
         return drawChessBoard();
     }
 
     public String listGames() throws DataAccessException {
         GameData[] listOfAllGames = server.getAllGames(authData);
-        gameData = listOfAllGames;
+        clientListedGameData = listOfAllGames;
         StringBuilder constructedListOFAllGames = new StringBuilder();
 
         for (int i = 0; i < listOfAllGames.length; i++) {
@@ -154,7 +153,7 @@ public class ChessClient {
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
-                    register <username> <password> <email> - to create an account
+                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
                     login <USERNAME> <PASSWORD> - to play chess
                     quit - playing chess
                     help - with possible commands
@@ -180,44 +179,44 @@ public class ChessClient {
     }
 
     private String clientErrorMessage(String errorMessage, String inputType) {
-        String error500 = "internal server error";
+        //String error500 = "internal server error";
 
         return switch (inputType) {
             case "login" -> {
                 if (errorMessage.equals("failure 401")) {
                     yield "username or password are incorrect";
                 }
-                yield error500;
+                yield errorMessage;
             }
             case "list", "logout" -> {
                 if (errorMessage.equals("failure 401")) {
                     yield "unauthorized";
                 }
-                yield error500;
+                yield errorMessage;
             }
             case "create" -> switch (errorMessage) {
                 case "failure 400" -> "invalid game name";
                 case "failure 401" -> "unauthorized";
-                default -> error500;
+                default -> errorMessage;
             };
             case "join" -> switch (errorMessage) {
                 case "failure 400" -> "not a valid game ID";
                 case "failure 401" -> "unauthorized";
                 case "failure: 403" -> "player color already taken";
-                default -> error500;
+                default -> errorMessage;
             };
             case "observe" -> {
                 if (errorMessage.equals("failure 400")) {
                     yield "not a valid game ID";
                 }
-                yield error500;
+                yield errorMessage;
             }
             case "register" -> switch (errorMessage) {
                 case "failure 400" -> "not a valid username or password";
                 case "failure: 403" -> "username already taken";
-                default -> error500;
+                default -> errorMessage;
             };
-            default -> error500;
+            default -> errorMessage;
         };
     }
 }

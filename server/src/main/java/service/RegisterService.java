@@ -21,7 +21,8 @@ public class RegisterService {
     }
 
     public Result registerUser(RegisterRequest theUserLoginData) {
-        if (!isUsernameValid(theUserLoginData.username()) || !isPasswordValid(theUserLoginData.password())) {
+        if (theUserLoginData == null ||
+                !isUsernameValid(theUserLoginData.username()) || !isPasswordValid(theUserLoginData.password())) {
             return new Result("Error: bad request");
         }
 

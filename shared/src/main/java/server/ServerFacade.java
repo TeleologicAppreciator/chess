@@ -73,8 +73,6 @@ public class ServerFacade {
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
-
-
     }
 
     private static  void writeAuthorization(AuthData theAuthData, HttpURLConnection http) throws IOException {
@@ -119,6 +117,4 @@ public class ServerFacade {
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
     }
-
-
 }
