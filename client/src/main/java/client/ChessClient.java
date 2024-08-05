@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
@@ -91,6 +92,8 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws DataAccessException {
+        return drawChessBoard(null);
+        /*
         Integer gameID = null;
         String playerColor = null;
         if (params.length > 1) {
@@ -108,6 +111,7 @@ public class ChessClient {
         }
 
         return drawChessBoard();
+         */
     }
 
     public String observe(String... params) throws DataAccessException {
@@ -119,7 +123,7 @@ public class ChessClient {
         }
         JoinData dataOfGameToObserve = new JoinData(null, clientListedGameData[gameID - 1].gameID());
 
-        return drawChessBoard();
+        return drawChessBoard(null);
     }
 
     public String listGames() throws DataAccessException {
@@ -170,8 +174,15 @@ public class ChessClient {
                """;
     }
 
-    private String drawChessBoard() {
-        return "drawing chess board be implemented";
+    private String drawChessBoard(ChessBoard trheBoard) {
+        System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+        for(int i = 0; i < 10; i++) {
+            System.out.print(EscapeSequences.EMPTY);
+        }
+
+        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+        System.out.println();
+        return "finished printing chessboard";
     }
 
     public String getLoginState() {

@@ -10,7 +10,8 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("\uD83D\uDC36 Welcome to 240 Chess, please login to start");
+        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+        System.out.println("\u265A Welcome to 240 Chess, please login to start \u2654");
         System.out.print(client.help());
 
         Scanner scanner = new Scanner(System.in);

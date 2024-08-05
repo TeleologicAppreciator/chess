@@ -35,11 +35,11 @@ public class ServerFacade {
 
     public GameData[] getAllGames(AuthData theGetAllGamesAuth) throws DataAccessException {
         var path = "/game";
-        record listGameResponse(GameData[] game) {
+        record listGameResponse(GameData[] games) {
         }
 
         var response = makeRequest("GET", path, null, listGameResponse.class, theGetAllGamesAuth);
-        return response.game();
+        return response.games();
     }
 
     public Integer createGame(GameData theGameName, AuthData theCreateGameAuth) throws DataAccessException {
