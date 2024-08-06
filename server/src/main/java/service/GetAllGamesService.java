@@ -3,9 +3,9 @@ package service;
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
 import model.GameData;
-import server.request.GetAllGamesRequest;
-import server.result.Result;
-import server.result.GetAllGameResult;
+import request.GetAllGamesRequest;
+import result.Result;
+import result.GetAllGameResult;
 
 public class GetAllGamesService extends AuthService {
     private final GameDAO myGameData;

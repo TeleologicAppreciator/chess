@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.memory.MemoryAuthDAO;
 import dataaccess.memory.MemoryGameDAO;
 import dataaccess.memory.MemoryUserDAO;
+import facade.request.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -11,7 +12,7 @@ import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
-import server.request.*;
+import request.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

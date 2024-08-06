@@ -1,16 +1,15 @@
-package server;
+package facade;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
+import request.CreateGameRequest;
+import request.JoinGameRequest;
+import request.RegisterRequest;
+import result.CreateGameResult;
 import model.AuthData;
 import model.GameData;
 import model.JoinData;
 import model.UserData;
-import server.request.CreateGameRequest;
-import server.request.JoinGameRequest;
-import server.request.RegisterRequest;
-import server.result.CreateGameResult;
-import server.result.GetAllGameResult;
+import result.GetAllGameResult;
 
 import java.io.*;
 import java.net.*;
@@ -79,7 +78,7 @@ public class ServerFacade {
             throwIfNotSuccessful(http);
             return readBody(http, theResponseClass);
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 

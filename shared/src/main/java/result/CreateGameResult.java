@@ -1,4 +1,4 @@
-package server.result;
+package result;
 
 public class CreateGameResult extends Result {
     private int gameID;

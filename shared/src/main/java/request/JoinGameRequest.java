@@ -1,4 +1,4 @@
-package server.request;
+package request;
 
 public class JoinGameRequest {
     private String playerColor;

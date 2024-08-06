@@ -1,6 +1,6 @@
 package handler;
 
-import server.result.Result;
+import result.Result;
 
 public class Handler {
 

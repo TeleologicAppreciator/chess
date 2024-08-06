@@ -1,8 +1,8 @@
 package handler;
 
 import com.google.gson.Gson;
-import server.request.RegisterRequest;
-import server.result.Result;
+import request.RegisterRequest;
+import result.Result;
 import service.RegisterService;
 import spark.Request;
 import spark.Response;

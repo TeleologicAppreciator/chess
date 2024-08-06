@@ -1,4 +1,4 @@
-package server.request;
+package request;
 
 public class CreateGameRequest {
     private String authToken;
