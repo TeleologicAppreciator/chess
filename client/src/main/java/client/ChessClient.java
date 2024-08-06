@@ -107,6 +107,10 @@ public class ChessClient {
             throw new Exception("Input invalid please make sure you enter valid game ID from the list");
         }
 
+        if(gameID > clientListedGameData.length) {
+            throw new Exception("not a valid game ID");
+        }
+
         JoinData dataOfGameToJoin = new JoinData(playerColor, clientListedGameData[gameID - 1].gameID());
         server.joinGame(dataOfGameToJoin, authData);
 
@@ -127,6 +131,11 @@ public class ChessClient {
         } else {
             throw new Exception("Input invalid please make sure you enter valid game ID from the list");
         }
+
+        if(gameID > clientListedGameData.length) {
+            throw new Exception("not a valid game ID");
+        }
+
         JoinData dataOfGameToObserve = new JoinData(null, clientListedGameData[gameID - 1].gameID());
 
         drawChessBoard(clientListedGameData[gameID - 1].game().getBoard(), false);
@@ -208,95 +217,95 @@ public class ChessClient {
 
         System.out.println();
         System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
+        System.out.print(EscapeSequences.RESET_TEXT_BOLD_FAINT);
     }
 
     private void drawChessBoardBody(ChessBoard theBoard, boolean isBlackPerspective) {
         if (isBlackPerspective) {
-            for (int row = 1; row <= 8; ++row) {
-                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-                drawChessSide(row);
-
-                for (int column = 0; column < 8; column++) {
-                    if (row % 2 == 1) {
-                        if (column % 2 == 0) {
-                            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                        } else {
-                            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                        }
-                    } else {
-                        if (column % 2 == 0) {
-                            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                        } else {
-                            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                        }
-                    }
-
-                    ChessPiece currentPiece = theBoard.getPiece(new ChessPosition(row, column + 1));
-                    if (currentPiece != null) {
-                        if (currentPiece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
-                            System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                        } else {
-                            System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
-                        }
-
-                        System.out.print(" ");
-                        System.out.print(currentPiece.toString());
-                        System.out.print(" ");
-                    } else {
-                        System.out.print(EscapeSequences.EMPTY);
-                    }
-                }
-
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
-                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-                drawChessSide(row);
-
-                System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                System.out.println();
-            }
+            drawChessBodyBlackPerspective(theBoard);
         } else {
-            for (int row = 8; row > 0; --row) {
-                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-                drawChessSide(row);
+            drawChessBodyWhitePerspective(theBoard);
+        }
+    }
 
-                for (int column = 0; column < 8; column++) {
-                    if (row % 2 == 0) {
-                        if (column % 2 == 0) {
-                            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                        } else {
-                            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                        }
+    private void drawChessBodyBlackPerspective(ChessBoard theBoard) {
+        for (int row = 1; row <= 8; ++row) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+            drawChessSide(row);
+
+            for (int column = 0; column < 8; column++) {
+                if (row % 2 == 1) {
+                    if (column % 2 == 0) {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
                     } else {
-                        if (column % 2 == 0) {
-                            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                        } else {
-                            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                        }
+                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
                     }
-
-                    ChessPiece currentPiece = theBoard.getPiece(new ChessPosition(row, column + 1));
-                    if (currentPiece != null) {
-                        if (currentPiece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
-                            System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                        } else {
-                            System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
-                        }
-
-                        System.out.print(" ");
-                        System.out.print(currentPiece.toString());
-                        System.out.print(" ");
+                } else {
+                    if (column % 2 == 0) {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
                     } else {
-                        System.out.print(EscapeSequences.EMPTY);
+                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
                     }
                 }
 
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
-                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-                drawChessSide(row);
-
-                System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                System.out.println();
+                setChessPieceColor(theBoard, row, column);
             }
+
+            System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
+            System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+            drawChessSide(row);
+
+            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+            System.out.println();
+        }
+    }
+
+    private void drawChessBodyWhitePerspective(ChessBoard theBoard) {
+        for (int row = 8; row > 0; --row) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+            drawChessSide(row);
+
+            for (int column = 0; column < 8; column++) {
+                if (row % 2 == 0) {
+                    if (column % 2 == 0) {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+                    } else {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                    }
+                } else {
+                    if (column % 2 == 0) {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                    } else {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+                    }
+                }
+
+                setChessPieceColor(theBoard, row, column);
+            }
+
+            System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
+            System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+            drawChessSide(row);
+
+            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+            System.out.println();
+        }
+    }
+
+    private void setChessPieceColor(ChessBoard theBoard, int row, int column) {
+        ChessPiece currentPiece = theBoard.getPiece(new ChessPosition(row, column + 1));
+        if (currentPiece != null) {
+            if (currentPiece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+            } else {
+                System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+            }
+
+            System.out.print(" ");
+            System.out.print(currentPiece.toString());
+            System.out.print(" ");
+        } else {
+            System.out.print(EscapeSequences.EMPTY);
         }
     }
 

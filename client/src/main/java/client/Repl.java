@@ -11,6 +11,7 @@ public class Repl {
 
     public void run() {
         System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
         System.out.println("\u265A Welcome to 240 Chess, please login to start \u2654");
         System.out.print(client.help());
 

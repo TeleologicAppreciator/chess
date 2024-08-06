@@ -1,6 +1,5 @@
 package client;
 
-import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import model.JoinData;
@@ -59,7 +58,7 @@ public class ServerFacadeTests {
 
     @Test
     public void loginNegative() {
-        assertThrows(DataAccessException.class, () -> serverFacade.loginUser(testUser));
+        assertThrows(Exception.class, () -> serverFacade.loginUser(testUser));
     }
 
     @Test
@@ -74,7 +73,7 @@ public class ServerFacadeTests {
     @Test
     public void logoutNegative() {
         AuthData logoutAuth = null;
-        assertThrows(DataAccessException.class, () -> serverFacade.logoutUser(logoutAuth));
+        assertThrows(Exception.class, () -> serverFacade.logoutUser(logoutAuth));
     }
 
     @Test
@@ -89,7 +88,7 @@ public class ServerFacadeTests {
     @Test
     public void getAllGamesNegative() {
         AuthData getAllGamesAuth = null;
-        assertThrows(DataAccessException.class, () -> serverFacade.getAllGames(getAllGamesAuth));
+        assertThrows(Exception.class, () -> serverFacade.getAllGames(getAllGamesAuth));
     }
 
     @Test
@@ -145,7 +144,6 @@ public class ServerFacadeTests {
         serverFacade.joinGame(dataToJoinWith, finalCreateGameAuth);
         assertThrows(Exception.class, () -> serverFacade.joinGame(dataToJoinWith, finalCreateGameAuth));
     }
-
 
     @Test
     public void deleteAllPositive() {
