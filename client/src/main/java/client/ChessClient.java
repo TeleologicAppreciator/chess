@@ -1,7 +1,9 @@
 package client;
 
 import chess.ChessBoard;
-import dataaccess.DataAccessException;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.AuthData;
 import model.GameData;
 import model.JoinData;
@@ -54,7 +56,7 @@ public class ChessClient {
             password = params[1];
             email = params[2];
         } else {
-            throw new DataAccessException("You need a username, password, and email to register");
+            throw new Exception("You need a username, password, and email to register");
         }
         UserData userRegistrationData = new UserData(username, password, email);
 
@@ -70,7 +72,7 @@ public class ChessClient {
             username = params[0];
             password = params[1];
         } else {
-            throw new DataAccessException("You must specify a username and password to login");
+            throw new Exception("You must specify a username and password to login");
         }
         UserData userToLogin = new UserData(username, password, null);
 
@@ -84,7 +86,7 @@ public class ChessClient {
         if (params.length > 0) {
             gameName = params[0];
         } else {
-            throw new DataAccessException("You must specify the game name to make a game");
+            throw new Exception("You must specify the game name to make a game");
         }        //the server does not grab the gameID int value
         server.createGame(new GameData(0, null, null, gameName, null), authData);
 
@@ -92,7 +94,10 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws Exception {
-        //return drawChessBoard(null);
+        if (clientListedGameData == null) {
+            throw new Exception("You must list games before joining");
+        }
+
         Integer gameID = null;
         String playerColor = null;
         if (params.length > 1) {
@@ -103,27 +108,31 @@ public class ChessClient {
         }
 
         JoinData dataOfGameToJoin = new JoinData(playerColor, clientListedGameData[gameID - 1].gameID());
-        try {
-            server.joinGame(dataOfGameToJoin, authData);
-        } catch (Exception e) {
-            return "Error joining game: " + dataOfGameToJoin;
-        }
+        server.joinGame(dataOfGameToJoin, authData);
 
-        //return drawChessBoard();
+        drawChessBoard(clientListedGameData[gameID - 1].game().getBoard(), false);
+        drawChessBoard(clientListedGameData[gameID - 1].game().getBoard(), true);
 
         return "successfully joined game";
     }
 
     public String observe(String... params) throws Exception {
+        if (clientListedGameData == null) {
+            throw new Exception("You must list games before joining");
+        }
+
         Integer gameID = null;
         if (params.length > 0) {
             gameID = Integer.parseInt(params[0]);
         } else {
-            throw new DataAccessException("Input invalid please make sure you enter valid game ID from the list");
+            throw new Exception("Input invalid please make sure you enter valid game ID from the list");
         }
         JoinData dataOfGameToObserve = new JoinData(null, clientListedGameData[gameID - 1].gameID());
 
-        return drawChessBoard(null);
+        drawChessBoard(clientListedGameData[gameID - 1].game().getBoard(), false);
+        drawChessBoard(clientListedGameData[gameID - 1].game().getBoard(), true);
+
+        return "successfully observing game";
     }
 
     public String listGames() throws Exception {
@@ -154,9 +163,12 @@ public class ChessClient {
             constructedListOFAllGames.append("\n");
         }
 
-        return constructedListOFAllGames.toString();
+        String result = constructedListOFAllGames.toString();
+        if(result.isEmpty()) {
+            return "no games currently created";
+        }
 
-
+        return result;
     }
 
     public String logout() throws Exception {
@@ -186,15 +198,136 @@ public class ChessClient {
                """;
     }
 
-    private String drawChessBoard(ChessBoard theBoard) {
+    private void drawChessBoard(ChessBoard theBoard, boolean isBlackPerspective) {
+        System.out.print(EscapeSequences.SET_TEXT_BOLD);
+
+        //line 1
+        drawChessTop(isBlackPerspective);
+        drawChessBoardBody(theBoard, isBlackPerspective);
+        drawChessTop(isBlackPerspective);
+
+        System.out.println();
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
+    }
+
+    private void drawChessBoardBody(ChessBoard theBoard, boolean isBlackPerspective) {
+        if (isBlackPerspective) {
+            for (int row = 1; row <= 8; ++row) {
+                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                drawChessSide(row);
+
+                for (int column = 0; column < 8; column++) {
+                    if (row % 2 == 1) {
+                        if (column % 2 == 0) {
+                            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+                        } else {
+                            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                        }
+                    } else {
+                        if (column % 2 == 0) {
+                            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                        } else {
+                            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+                        }
+                    }
+
+                    ChessPiece currentPiece = theBoard.getPiece(new ChessPosition(row, column + 1));
+                    if (currentPiece != null) {
+                        if (currentPiece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                            System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                        } else {
+                            System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                        }
+
+                        System.out.print(" ");
+                        System.out.print(currentPiece.toString());
+                        System.out.print(" ");
+                    } else {
+                        System.out.print(EscapeSequences.EMPTY);
+                    }
+                }
+
+                System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
+                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                drawChessSide(row);
+
+                System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                System.out.println();
+            }
+        } else {
+            for (int row = 8; row > 0; --row) {
+                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                drawChessSide(row);
+
+                for (int column = 0; column < 8; column++) {
+                    if (row % 2 == 0) {
+                        if (column % 2 == 0) {
+                            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+                        } else {
+                            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                        }
+                    } else {
+                        if (column % 2 == 0) {
+                            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                        } else {
+                            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+                        }
+                    }
+
+                    ChessPiece currentPiece = theBoard.getPiece(new ChessPosition(row, column + 1));
+                    if (currentPiece != null) {
+                        if (currentPiece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                            System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                        } else {
+                            System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                        }
+
+                        System.out.print(" ");
+                        System.out.print(currentPiece.toString());
+                        System.out.print(" ");
+                    } else {
+                        System.out.print(EscapeSequences.EMPTY);
+                    }
+                }
+
+                System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
+                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                drawChessSide(row);
+
+                System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                System.out.println();
+            }
+        }
+    }
+
+    private void drawChessTop(boolean isBlackPerspective) {
         System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-        for(int i = 0; i < 10; i++) {
-            System.out.print(EscapeSequences.EMPTY);
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
+        System.out.print(EscapeSequences.EMPTY);
+
+        if (isBlackPerspective) {
+            for (char c = 'a'; c <= 'h'; ++c) {
+                System.out.print(" ");
+                System.out.print(c);
+                System.out.print(" ");
+            }
+        } else {
+            for (char c = 'h'; c >= 'a'; --c) {
+                System.out.print(" ");
+                System.out.print(c);
+                System.out.print(" ");
+            }
         }
 
+        System.out.print(EscapeSequences.EMPTY);
         System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
         System.out.println();
-        return "finished printing chessboard";
+    }
+
+    private void drawChessSide(int theLineNumber) {
+        System.out.print(" ");
+        System.out.print(theLineNumber);
+        System.out.print(" ");
     }
 
     public String getLoginState() {
