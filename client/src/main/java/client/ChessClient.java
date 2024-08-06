@@ -233,14 +233,10 @@ public class ChessClient {
             System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
             drawChessSide(row);
 
-            for (int column = 0; column < 8; column++) {
-                if (row % 2 == 1) {
-                    whiteTilesFirst(column);
-                } else {
-                    blackTilesFirst(column);
-                }
+            for (int column = 7; column >= 0; column--) {
+                correctTileOrder(row, column);
 
-                setChessPieceColor(theBoard, row, column);
+                printChessPiece(theBoard, row, column);
             }
 
             finishChessBoardLine(row);
@@ -253,16 +249,20 @@ public class ChessClient {
             drawChessSide(row);
 
             for (int column = 0; column < 8; column++) {
-                if (row % 2 == 0) {
-                    whiteTilesFirst(column);
-                } else {
-                    blackTilesFirst(column);
-                }
+                correctTileOrder(row, column);
 
-                setChessPieceColor(theBoard, row, column);
+                printChessPiece(theBoard, row, column);
             }
 
             finishChessBoardLine(row);
+        }
+    }
+
+    private void correctTileOrder(int row, int column) {
+        if (row % 2 == 0) {
+            whiteTilesFirst(column);
+        } else {
+            blackTilesFirst(column);
         }
     }
 
@@ -291,7 +291,7 @@ public class ChessClient {
         System.out.println();
     }
 
-    private void setChessPieceColor(ChessBoard theBoard, int row, int column) {
+    private void printChessPiece(ChessBoard theBoard, int row, int column) {
         ChessPiece currentPiece = theBoard.getPiece(new ChessPosition(row, column + 1));
         if (currentPiece != null) {
             if (currentPiece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
@@ -313,7 +313,7 @@ public class ChessClient {
         System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
         System.out.print(EscapeSequences.EMPTY);
 
-        if (isBlackPerspective) {
+        if (!isBlackPerspective) {
             for (char c = 'a'; c <= 'h'; ++c) {
                 System.out.print(" ");
                 System.out.print(c);
