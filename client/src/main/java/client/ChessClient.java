@@ -235,28 +235,15 @@ public class ChessClient {
 
             for (int column = 0; column < 8; column++) {
                 if (row % 2 == 1) {
-                    if (column % 2 == 0) {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                    } else {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                    }
+                    whiteTilesFirst(column);
                 } else {
-                    if (column % 2 == 0) {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                    } else {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                    }
+                    blackTilesFirst(column);
                 }
 
                 setChessPieceColor(theBoard, row, column);
             }
 
-            System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
-            System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-            drawChessSide(row);
-
-            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-            System.out.println();
+            finishChessBoardLine(row);
         }
     }
 
@@ -267,29 +254,41 @@ public class ChessClient {
 
             for (int column = 0; column < 8; column++) {
                 if (row % 2 == 0) {
-                    if (column % 2 == 0) {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                    } else {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                    }
+                    whiteTilesFirst(column);
                 } else {
-                    if (column % 2 == 0) {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                    } else {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                    }
+                    blackTilesFirst(column);
                 }
 
                 setChessPieceColor(theBoard, row, column);
             }
 
-            System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
-            System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-            drawChessSide(row);
-
-            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-            System.out.println();
+            finishChessBoardLine(row);
         }
+    }
+
+    private void whiteTilesFirst(int column) {
+        if (column % 2 == 0) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+        } else {
+            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+        }
+    }
+
+    private void blackTilesFirst(int column) {
+        if (column % 2 == 0) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+        } else {
+            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+        }
+    }
+
+    private void finishChessBoardLine(int row) {
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
+        System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+        drawChessSide(row);
+
+        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+        System.out.println();
     }
 
     private void setChessPieceColor(ChessBoard theBoard, int row, int column) {
