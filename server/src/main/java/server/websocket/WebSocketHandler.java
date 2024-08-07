@@ -1,5 +1,7 @@
 package server.websocket;
 
+import org.eclipse.jetty.websocket.api.Session;
+
 public class WebSocketHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
@@ -20,12 +22,28 @@ public class WebSocketHandler {
                 case LEAVE -> leaveGame(session, username, (LeaveGameCommand) command);
                 case RESIGN -> resign(session, username, (ResignCommand) command);
             }
-        } catch (UnauthorizedException ex) {
+        } catch (UnauthorizedException e) {
             // Serializes and sends the error message
             sendMessage(session.getRemote(), new ErrorMessage("Error: unauthorized"));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            sendMessage(session.getRemote(), new ErrorMessage("Error: " + ex.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendMessage(session.getRemote(), new ErrorMessage("Error: " + e.getMessage()));
         }
+    }
+
+    private void connect(Session theSession, String theUsername, ConnectCommand theConnectCommand) {
+
+    }
+
+    private void makeMove(Session theSession, String theUsername, MakeMoveCommand theMoveCommand) {
+
+    }
+
+    private void leaveGame(Session theSession, String theUsername, LeaveGameCommad theLeaveCommand) {
+
+    }
+
+    private void resign(Session theSession, String theUsername, ResignCommand theResignCommand) {
+
     }
 }
