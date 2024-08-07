@@ -1,18 +1,23 @@
 package server.websocket;
 
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import websocket.commands.UserGameCommand;
 
+@WebSocket
 public class WebSocketHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String msg) {
+    public void onMessage(Session session, String theMessage) {
         try {
-            UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
+            UserGameCommand command = new Gson().fromJson(theMessage, UserGameCommand.class);
 
             // Throws a custom UnauthorizedException. Yours may work differently.
-            String username = getUsername(command.getAuthString());
+            String username = getUsername(command.getAuthToken());
 
             saveSession(command.getGameID(), session);
 
@@ -22,7 +27,7 @@ public class WebSocketHandler {
                 case LEAVE -> leaveGame(session, username, (LeaveGameCommand) command);
                 case RESIGN -> resign(session, username, (ResignCommand) command);
             }
-        } catch (UnauthorizedException e) {
+        } catch (Exception e) {
             // Serializes and sends the error message
             sendMessage(session.getRemote(), new ErrorMessage("Error: unauthorized"));
         } catch (Exception e) {
