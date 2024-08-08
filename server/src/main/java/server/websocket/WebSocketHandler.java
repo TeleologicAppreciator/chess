@@ -178,7 +178,16 @@ public class WebSocketHandler {
     }
 
     private void leaveGame(Session theSession, String theUsername, UserGameCommand theLeaveCommand) {
-
+        try {
+            connections.broadcast(theUsername, new NotificationMessage("%s has left the game.".formatted(theUsername)));
+            theSession.close();
+        } catch(IOException e) {
+            try {
+                sendMessage(theSession, new ErrorMessage("Error: invalid connection"));
+            } catch(IOException e2) {
+                e2.printStackTrace();
+            }
+        }
     }
 
     private void resign(Session theSession, String theUsername, UserGameCommand theResignCommand) {
