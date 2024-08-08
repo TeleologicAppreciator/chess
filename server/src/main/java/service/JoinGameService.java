@@ -48,7 +48,7 @@ public class JoinGameService extends AuthService {
         }
 
         try {
-            myGameData.updateGame(
+            myGameData.updateJoinGame(
                     theJoinGameRequest.playerColor(), needUsername.username(), gameToJoin);
         } catch(DataAccessException e) {
             if(e.getMessage().equals("Invalid player color")) {

@@ -228,14 +228,14 @@ public class DatabaseUnitTests {
     void joinGamePositive() throws DataAccessException {
         String gameName = "gameName";
         assertDoesNotThrow(() -> gameTestDatabase.createGame(gameName));
-        assertDoesNotThrow(() -> gameTestDatabase.updateGame("white", "test", gameTestDatabase.getGame(1)));
+        assertDoesNotThrow(() -> gameTestDatabase.updateJoinGame("white", "test", gameTestDatabase.getGame(1)));
     }
 
     @Test
     void joinGameNegative() throws DataAccessException {
         String gameName = "gameName";
         assertDoesNotThrow(() -> gameTestDatabase.createGame(gameName));
-        assertThrows(Exception.class, () -> gameTestDatabase.updateGame("white", "test", null));
+        assertThrows(Exception.class, () -> gameTestDatabase.updateJoinGame("white", "test", null));
     }
 
     @Test

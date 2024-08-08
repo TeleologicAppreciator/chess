@@ -1,6 +1,7 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.AuthData;
@@ -52,7 +53,8 @@ public class WebSocketHandler {
 
             AuthData usernameContainer = authService.getAuthData().getAuth(command.getAuthToken());
             if(usernameContainer == null) {
-                throw new DataAccessException("Error: unauthorized");
+                sendMessage(theSession, new ErrorMessage("Error: unauthorized"));
+                return;
             }
             String username = usernameContainer.username();
 
@@ -67,7 +69,6 @@ public class WebSocketHandler {
         } catch (DataAccessException e) {
             sendMessage(theSession, new ErrorMessage("Error: unauthorized"));
         } catch (Exception e) {
-            e.printStackTrace();
             sendMessage(theSession, new ErrorMessage("Error: " + e.getMessage()));
         }
     }
@@ -78,6 +79,7 @@ public class WebSocketHandler {
 
         if(gameData == null) {
             sendMessage(theSession, new ErrorMessage("Error: invalid game"));
+            return;
         }
 
         //generic UserGameCommands of type connect are observe commands
@@ -90,21 +92,17 @@ public class WebSocketHandler {
                 playerColor = ChessGame.TeamColor.BLACK;
             }
 
-            boolean joinedTheCorrectColor;
-            if(playerColor == ChessGame.TeamColor.WHITE) {
-                joinedTheCorrectColor = gameData.whiteUsername().equals(theUsername);
-            } else {
-                joinedTheCorrectColor = gameData.blackUsername().equals(theUsername);
-            }
+            ChessGame.TeamColor validTeamColor = getTeamColor(theUsername, gameData);
+            boolean joinedTheCorrectColor = validTeamColor != null && validTeamColor == playerColor;
 
-            if(!joinedTheCorrectColor) {
-                sendMessage(theSession, new ErrorMessage("Error: Did not join a color that is registered to you"));
-            } else {
+            if(joinedTheCorrectColor) {
                 connections.broadcast(theUsername, new NotificationMessage(
                         "%s has joined the game %s as %s".formatted(theUsername,
                                 theConnectCommand.getGameID(), ((JoinCommand) theConnectCommand).getPlayerColor())));
 
-                sendMessage(theSession, new LoadGameMessage(gameData.game().getBoard()));
+                sendMessage(theSession, new LoadGameMessage(gameData.game()));
+            } else {
+                sendMessage(theSession, new ErrorMessage("Error: Did not join a color that is registered to you"));
             }
             //observer joined
         } else {
@@ -112,12 +110,71 @@ public class WebSocketHandler {
                     "%s has joined game %s as an observer".formatted(theUsername,
                             theConnectCommand.getGameID())));
 
-            sendMessage(theSession, new LoadGameMessage(gameData.game().getBoard()));
+            sendMessage(theSession, new LoadGameMessage(gameData.game()));
         }
     }
 
-    private void makeMove(Session theSession, String theUsername, MakeMoveCommand theMoveCommand) {
+    private void makeMove(Session theSession, String theUsername, MakeMoveCommand theMoveCommand)
+            throws IOException, DataAccessException {
+        GameData gameData = gameService.getGameData().getGame(theMoveCommand.getGameID());
+        ChessGame game = gameData.game();
 
+        ChessGame.TeamColor userMoveColor = getTeamColor(theUsername, gameData);
+
+        if(userMoveColor == null) {
+            sendMessage(theSession, new ErrorMessage("Error: You are observing"));
+            return;
+        }
+
+        if(!game.getTeamTurn().equals(userMoveColor)) {
+            sendMessage(theSession, new ErrorMessage("Error: It is not your turn to move"));
+            return;
+        }
+
+        if(game.isInCheckmate(userMoveColor) || game.isInStalemate(userMoveColor)) {
+            sendMessage(theSession, new ErrorMessage("Error: The game is over."));
+            return;
+        }
+
+        try {
+            game.makeMove(theMoveCommand.getMove());
+        } catch (InvalidMoveException e) {
+            sendMessage(theSession, new ErrorMessage("Error: invalid chess move"));
+            return;
+        }
+
+        ChessGame.TeamColor opponentColor;
+        if(getTeamColor(theUsername, gameData) == ChessGame.TeamColor.BLACK) {
+            opponentColor = ChessGame.TeamColor.WHITE;
+        } else {
+            opponentColor = ChessGame.TeamColor.BLACK;
+        }
+
+        connections.broadcast(theUsername, new NotificationMessage("%s playing as %s moved %s from %s to %s".formatted(
+                theUsername, userMoveColor,
+                game.getBoard().getPiece(theMoveCommand.getMove().getStartPosition()),
+                theMoveCommand.getMove().getStartPosition().toString(),
+                theMoveCommand.getMove().getEndPosition().toString())));
+
+        NotificationMessage notificationMessage = null;
+
+        if(game.isInCheckmate(opponentColor)) {
+            notificationMessage = new NotificationMessage(
+                    "Checkmate, %s is the winner!".formatted(userMoveColor.toString()));
+        }
+
+        if(game.isInStalemate(opponentColor)) {
+            notificationMessage = new NotificationMessage("Stalemate! The game ends in a draw!");
+        }
+
+        if(game.isInCheck(opponentColor)) {
+            notificationMessage = new NotificationMessage("%s is in check!".formatted(opponentColor.toString()));
+        }
+
+        gameService.getGameData().updateLiveGame(gameData);
+
+        LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
+        connections.broadcast(theUsername, loadGameMessage);
     }
 
     private void leaveGame(Session theSession, String theUsername, UserGameCommand theLeaveCommand) {
@@ -168,6 +225,21 @@ public class WebSocketHandler {
     }
 
     public void sendMessage(Session theSession, ServerMessage theMessage) throws IOException {
+        if(theMessage instanceof ErrorMessage) {
+            System.out.println(((ErrorMessage) theMessage).getErrorMessage());
+        }
         theSession.getRemote().sendString(new Gson().toJson(theMessage));
+    }
+
+    private ChessGame.TeamColor getTeamColor(String theUsername, GameData theGameData) {
+        if (theUsername.equals(theGameData.whiteUsername())) {
+            return ChessGame.TeamColor.WHITE;
+        }
+
+        if (theUsername.equals(theGameData.blackUsername())) {
+            return ChessGame.TeamColor.BLACK;
+        }
+
+        return null;
     }
 }

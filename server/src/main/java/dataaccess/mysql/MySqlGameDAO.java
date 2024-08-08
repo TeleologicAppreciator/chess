@@ -6,6 +6,7 @@ import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.GameData;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -73,9 +74,7 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
         }
     }
 
-    public void updateGame(String thePlayerColor, String username, GameData theGame) throws DataAccessException {
-        GameData theGameToCompare = getGame(theGame.gameID());
-
+    public void updateJoinGame(String thePlayerColor, String username, GameData theGame) throws DataAccessException {
         try (var connection = DatabaseManager.getConnection()) {
             String statement;
             if (thePlayerColor.equalsIgnoreCase("white")) {
@@ -93,6 +92,20 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
+    }
+
+    public void updateLiveGame(GameData theGame) throws DataAccessException {
+        try (var connection = DatabaseManager.getConnection()) {
+            String statement = "UPDATE game SET json = ? WHERE id = ?";
+
+            try (var preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, new Gson().toJson(theGame));
+                preparedStatement.setInt(2, theGame.gameID());
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+
     }
 
     public int size() throws DataAccessException {

@@ -41,7 +41,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame(String thePlayerColor, String theUsername, GameData theGame)
+    public void updateJoinGame(String thePlayerColor, String theUsername, GameData theGame)
             throws DataAccessException {
 
         int gameIDOfUpdatingGame = theGame.gameID();
@@ -97,6 +97,10 @@ public class MemoryGameDAO implements GameDAO {
         }
 
         return resultTeamColor;
+    }
+
+    public void updateLiveGame(GameData theGame) {
+        //implement if you need an in memory storage
     }
 
     public int size() {

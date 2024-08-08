@@ -54,6 +54,19 @@ public class ChessPosition {
 
     @Override
     public String toString() {
-        return "(" + myRow + ", " + myColumn + ")";
+        return convertColumnToAlphabet(myColumn) + String.valueOf(myRow);
+    }
+
+    private String convertColumnToAlphabet(int theColumn) {
+        return switch (theColumn) {
+            case 1 -> "a";
+            case 2 -> "b";
+            case 3 -> "c";
+            case 4 -> "d";
+            case 5 -> "e";
+            case 6 -> "f";
+            case 7 -> "g";
+            default -> "h";
+        };
     }
 }
