@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.AuthService;
@@ -22,6 +24,16 @@ public class WebSocketHandler {
 
     public WebSocketHandler(AuthService theAuthService) {
         authService = theAuthService;
+    }
+
+    @OnWebSocketConnect
+    public void onConnect(Session theSession) {
+        sessions.addSession(theSession);
+    }
+
+    @OnWebSocketClose
+    public void onClose(Session theSession, int theStatusCode, String theReason) {
+        sessions.removeSession(theSession);
     }
 
     @OnWebSocketMessage
@@ -93,22 +105,26 @@ public class WebSocketHandler {
             this.sessionMap = new HashMap<>();
         }
 
-        public void addSessionForGame(Integer gameID, Session session) {
+        private void addSessionForGame(Integer gameID, Session session) {
             gameMap.get(gameID).add(session);
             sessionMap.put(session, gameID);
         }
 
-        public boolean removeSessionFromGame(Integer theGameID, Session theSession) {
+        private boolean removeSessionFromGame(Integer theGameID, Session theSession) {
             removeSession(theSession);
             return gameMap.get(theGameID).remove(theSession);
         }
 
-        public void removeSession(Session theSession) {
+        private void removeSession(Session theSession) {
             sessionMap.remove(theSession);
         }
 
-        public void saveSession(int theGameID, Session theSession) {
+        private void saveSession(int theGameID, Session theSession) {
             sessionMap.replace(theSession, theGameID);
+        }
+
+        private void addSession(Session theSession) {
+            sessionMap.put(theSession, 0);
         }
     }
 }
