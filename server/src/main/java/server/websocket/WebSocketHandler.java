@@ -131,7 +131,7 @@ public class WebSocketHandler {
             return;
         }
 
-        if(game.isInCheckmate(userMoveColor) || game.isInStalemate(userMoveColor)) {
+        if(game.isGameOver() || game.isInCheckmate(userMoveColor) || game.isInStalemate(userMoveColor)) {
             sendMessage(theSession, new ErrorMessage("Error: The game is over."));
             return;
         }
@@ -143,12 +143,7 @@ public class WebSocketHandler {
             return;
         }
 
-        ChessGame.TeamColor opponentColor;
-        if(getTeamColor(theUsername, gameData) == ChessGame.TeamColor.BLACK) {
-            opponentColor = ChessGame.TeamColor.WHITE;
-        } else {
-            opponentColor = ChessGame.TeamColor.BLACK;
-        }
+        ChessGame.TeamColor opponentColor = getOpponentColor(userMoveColor);
 
         connections.broadcast(theUsername, new NotificationMessage("%s playing as %s moved %s from %s to %s".formatted(
                 theUsername, userMoveColor,
@@ -159,15 +154,21 @@ public class WebSocketHandler {
         NotificationMessage notificationMessage = null;
 
         if(game.isInCheckmate(opponentColor)) {
+            game.setGameOver();
+
             notificationMessage = new NotificationMessage(
                     "Checkmate, %s is the winner!".formatted(userMoveColor.toString()));
         }
 
         if(game.isInStalemate(opponentColor)) {
+            game.setGameOver();
+
             notificationMessage = new NotificationMessage("Stalemate! The game ends in a draw!");
         }
 
         if(game.isInCheck(opponentColor)) {
+            game.setGameOver();
+
             notificationMessage = new NotificationMessage("%s is in check!".formatted(opponentColor.toString()));
         }
 
@@ -190,7 +191,29 @@ public class WebSocketHandler {
         }
     }
 
-    private void resign(Session theSession, String theUsername, UserGameCommand theResignCommand) {
+    private void resign(Session theSession, String theUsername, UserGameCommand theResignCommand)
+            throws DataAccessException, IOException {
+        GameData gameData = gameService.getGameData().getGame(theResignCommand.getGameID());
+        ChessGame game = gameData.game();
+        ChessGame.TeamColor userColor = getTeamColor(theUsername, gameData);
+
+        if(userColor == null) {
+            sendMessage(theSession, new ErrorMessage("Error: You are observing"));
+            return;
+        }
+
+        ChessGame.TeamColor opponentColor = getOpponentColor(userColor);
+
+        if(game.isGameOver()) {
+            sendMessage(theSession, new ErrorMessage("Error: The game is over."));
+            return;
+        }
+
+        game.setGameOver();
+        gameService.getGameData().updateLiveGame(gameData);
+
+        connections.broadcast(theUsername, new NotificationMessage(
+                "%s has resigned, %s wins!".formatted(theUsername, opponentColor.toString())));
 
     }
 
@@ -250,5 +273,13 @@ public class WebSocketHandler {
         }
 
         return null;
+    }
+
+    private ChessGame.TeamColor getOpponentColor(ChessGame.TeamColor theTeamColor) {
+        if(theTeamColor.equals(ChessGame.TeamColor.BLACK)) {
+            return ChessGame.TeamColor.WHITE;
+        } else {
+            return ChessGame.TeamColor.BLACK;
+        }
     }
 }

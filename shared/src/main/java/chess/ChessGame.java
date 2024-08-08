@@ -12,6 +12,7 @@ import java.util.HashSet;
 public class ChessGame {
     private final ChessBoard myChessBoard;
     private TeamColor myCurrentTeamTurn;
+    private boolean isGameOver = false;
 
     public ChessGame() {
         myChessBoard = new ChessBoard();
@@ -232,5 +233,13 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return myChessBoard;
+    }
+
+    public boolean isGameOver() {
+        return isGameOver;
+    }
+
+    public void setGameOver() {
+        isGameOver = true;
     }
 }
