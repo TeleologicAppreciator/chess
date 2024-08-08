@@ -1,15 +1,28 @@
 package server.websocket;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import model.AuthData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import websocket.commands.UserGameCommand;
+import service.AuthService;
+import websocket.commands.*;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @WebSocket
 public class WebSocketHandler {
-
     private final ConnectionManager connections = new ConnectionManager();
+    private final AuthService authService;
+    private final WebSocketSessions sessions = new WebSocketSessions();
+
+    public WebSocketHandler(AuthService theAuthService) {
+        authService = theAuthService;
+    }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String theMessage) {
@@ -17,26 +30,38 @@ public class WebSocketHandler {
             UserGameCommand command = new Gson().fromJson(theMessage, UserGameCommand.class);
 
             // Throws a custom UnauthorizedException. Yours may work differently.
-            String username = getUsername(command.getAuthToken());
+            AuthData usernameContainer = authService.getAuthData().getAuth(command.getAuthToken());
+            if(usernameContainer == null) {
+                throw new DataAccessException("Error: unauthorized");
+            }
+            String username = usernameContainer.username();
 
-            saveSession(command.getGameID(), session);
+            sessions.saveSession(command.getGameID(), session);
 
             switch (command.getCommandType()) {
-                case CONNECT -> connect(session, username, (ConnectCommand) command);
+                case CONNECT -> connect(session, username, command);
                 case MAKE_MOVE -> makeMove(session, username, (MakeMoveCommand) command);
-                case LEAVE -> leaveGame(session, username, (LeaveGameCommand) command);
-                case RESIGN -> resign(session, username, (ResignCommand) command);
+                case LEAVE -> leaveGame(session, username, command);
+                case RESIGN -> resign(session, username, command);
+            }
+        } catch (DataAccessException e) {
+            // Serializes and sends the error message
+            try {
+                session.getRemote().sendString("Error: unauthorized");
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
         } catch (Exception e) {
-            // Serializes and sends the error message
-            sendMessage(session.getRemote(), new ErrorMessage("Error: unauthorized"));
-        } catch (Exception e) {
             e.printStackTrace();
-            sendMessage(session.getRemote(), new ErrorMessage("Error: " + e.getMessage()));
+            try {
+                session.getRemote().sendString("Error: " + e.getMessage());
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 
-    private void connect(Session theSession, String theUsername, ConnectCommand theConnectCommand) {
+    private void connect(Session theSession, String theUsername, UserGameCommand theConnectCommand) {
 
     }
 
@@ -44,11 +69,46 @@ public class WebSocketHandler {
 
     }
 
-    private void leaveGame(Session theSession, String theUsername, LeaveGameCommad theLeaveCommand) {
+    private void leaveGame(Session theSession, String theUsername, UserGameCommand theLeaveCommand) {
 
     }
 
-    private void resign(Session theSession, String theUsername, ResignCommand theResignCommand) {
+    private void resign(Session theSession, String theUsername, UserGameCommand theResignCommand) {
 
+    }
+
+    /**
+     * Stores web socket connections (Session) for each game
+     */
+    private static class WebSocketSessions {
+
+        //map of gameID to sessions participating in that game
+        private final Map<Integer, Set<Session>> gameMap;
+
+        //map of session to gameID
+        private final Map<Session, Integer> sessionMap;
+
+        private WebSocketSessions() {
+            this.gameMap = new HashMap<>();
+            this.sessionMap = new HashMap<>();
+        }
+
+        public void addSessionForGame(Integer gameID, Session session) {
+            gameMap.get(gameID).add(session);
+            sessionMap.put(session, gameID);
+        }
+
+        public boolean removeSessionFromGame(Integer theGameID, Session theSession) {
+            removeSession(theSession);
+            return gameMap.get(theGameID).remove(theSession);
+        }
+
+        public void removeSession(Session theSession) {
+            sessionMap.remove(theSession);
+        }
+
+        public void saveSession(int theGameID, Session theSession) {
+            sessionMap.replace(theSession, theGameID);
+        }
     }
 }

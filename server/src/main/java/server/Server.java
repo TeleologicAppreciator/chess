@@ -21,6 +21,7 @@ public class Server {
     private final GetAllGamesHandler myGetAllGamesHandler;
     private final CreateGameHandler myCreateGameHandler;
     private final JoinGameHandler myJoinGameHandler;
+    private final AuthService myAuthService;
 
     private final WebSocketHandler webSocketHandler;
 
@@ -55,7 +56,8 @@ public class Server {
         myCreateGameHandler = new CreateGameHandler(new CreateGameService(myAuthDatabase, myGameDatabase));
         myJoinGameHandler = new JoinGameHandler(new JoinGameService(myAuthDatabase, myGameDatabase));
 
-        webSocketHandler = new WebSocketHandler();
+        myAuthService = new AuthService(myAuthDatabase);
+        webSocketHandler = new WebSocketHandler(myAuthService);
     }
 
     public int run(int desiredPort) {
