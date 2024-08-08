@@ -95,8 +95,6 @@ public class WebSocketHandler {
                 //implemented once I have done server messages
                 //connections.broadcast(theUsername, );
             }
-
-
         } else {
 
         }
