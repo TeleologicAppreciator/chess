@@ -8,12 +8,12 @@ public class Connection {
     public String visitorName;
     public Session session;
 
-    public Connection(String visitorName, Session session) {
-        this.visitorName = visitorName;
-        this.session = session;
+    public Connection(String theVisitorName, Session theSession) {
+        visitorName = theVisitorName;
+        session = theSession;
     }
 
-    public void send(String msg) throws IOException {
-        session.getRemote().sendString(msg);
+    public void send(String theMessage) throws IOException {
+        session.getRemote().sendString(theMessage);
     }
 }

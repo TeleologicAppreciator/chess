@@ -1,14 +1,17 @@
 package server.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.AuthData;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.AuthService;
+import service.GetAllGamesService;
 import websocket.commands.*;
 
 import java.io.IOException;
@@ -20,10 +23,12 @@ import java.util.Set;
 public class WebSocketHandler {
     private final ConnectionManager connections = new ConnectionManager();
     private final AuthService authService;
+    private final GetAllGamesService gameService;
     private final WebSocketSessions sessions = new WebSocketSessions();
 
-    public WebSocketHandler(AuthService theAuthService) {
+    public WebSocketHandler(AuthService theAuthService, GetAllGamesService theGameService) {
         authService = theAuthService;
+        gameService = theGameService;
     }
 
     @OnWebSocketConnect
@@ -37,11 +42,10 @@ public class WebSocketHandler {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session theSession, String theMessage) {
+    public void onMessage(Session theSession, String theMessage) throws IOException {
         try {
             UserGameCommand command = new Gson().fromJson(theMessage, UserGameCommand.class);
 
-            // Throws a custom UnauthorizedException. Yours may work differently.
             AuthData usernameContainer = authService.getAuthData().getAuth(command.getAuthToken());
             if(usernameContainer == null) {
                 throw new DataAccessException("Error: unauthorized");
@@ -57,24 +61,45 @@ public class WebSocketHandler {
                 case RESIGN -> resign(theSession, username, command);
             }
         } catch (DataAccessException e) {
-            // Serializes and sends the error message
-            try {
-                theSession.getRemote().sendString("Error: unauthorized");
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            theSession.getRemote().sendString("Error: unauthorized");
         } catch (Exception e) {
             e.printStackTrace();
-            try {
-                theSession.getRemote().sendString("Error: " + e.getMessage());
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            theSession.getRemote().sendString("Error: " + e.getMessage());
         }
     }
 
-    private void connect(Session theSession, String theUsername, UserGameCommand theConnectCommand) {
+    private void connect(Session theSession, String theUsername, UserGameCommand theConnectCommand)
+            throws IOException, DataAccessException {
+        GameData gameData = gameService.getGameData().getGame(theConnectCommand.getGameID());
 
+        //generic UserGameCommands of type connect are observe commands
+        if(theConnectCommand instanceof JoinCommand) {
+            ChessGame.TeamColor playerColor;
+
+            if(((JoinCommand) theConnectCommand).getPlayerColor().equalsIgnoreCase("white")) {
+                playerColor = ChessGame.TeamColor.WHITE;
+            } else {
+                playerColor = ChessGame.TeamColor.BLACK;
+            }
+
+            boolean joinedTheCorrectColor;
+            if(playerColor == ChessGame.TeamColor.WHITE) {
+                joinedTheCorrectColor = gameData.whiteUsername().equals(theUsername);
+            } else {
+                joinedTheCorrectColor = gameData.blackUsername().equals(theUsername);
+            }
+
+            if(!joinedTheCorrectColor) {
+                theSession.getRemote().sendString("Error: Did not join a color that is registered to you");
+            } else {
+                //implemented once I have done server messages
+                //connections.broadcast(theUsername, );
+            }
+
+
+        } else {
+
+        }
     }
 
     private void makeMove(Session theSession, String theUsername, MakeMoveCommand theMoveCommand) {
