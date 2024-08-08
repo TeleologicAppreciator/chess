@@ -60,4 +60,8 @@ public class JoinGameService extends AuthService {
 
         return new Result();
     }
+
+    public GameDAO getGameData() {
+        return myGameData;
+    }
 }

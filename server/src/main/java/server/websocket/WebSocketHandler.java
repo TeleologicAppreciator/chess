@@ -11,8 +11,12 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.AuthService;
-import service.GetAllGamesService;
+import service.JoinGameService;
 import websocket.commands.*;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,10 +27,10 @@ import java.util.Set;
 public class WebSocketHandler {
     private final ConnectionManager connections = new ConnectionManager();
     private final AuthService authService;
-    private final GetAllGamesService gameService;
+    private final JoinGameService gameService;
     private final WebSocketSessions sessions = new WebSocketSessions();
 
-    public WebSocketHandler(AuthService theAuthService, GetAllGamesService theGameService) {
+    public WebSocketHandler(AuthService theAuthService, JoinGameService theGameService) {
         authService = theAuthService;
         gameService = theGameService;
     }
@@ -61,16 +65,20 @@ public class WebSocketHandler {
                 case RESIGN -> resign(theSession, username, command);
             }
         } catch (DataAccessException e) {
-            theSession.getRemote().sendString("Error: unauthorized");
+            sendMessage(theSession, new ErrorMessage("Error: unauthorized"));
         } catch (Exception e) {
             e.printStackTrace();
-            theSession.getRemote().sendString("Error: " + e.getMessage());
+            sendMessage(theSession, new ErrorMessage("Error: " + e.getMessage()));
         }
     }
 
     private void connect(Session theSession, String theUsername, UserGameCommand theConnectCommand)
             throws IOException, DataAccessException {
         GameData gameData = gameService.getGameData().getGame(theConnectCommand.getGameID());
+
+        if(gameData == null) {
+            sendMessage(theSession, new ErrorMessage("Error: invalid game"));
+        }
 
         //generic UserGameCommands of type connect are observe commands
         if(theConnectCommand instanceof JoinCommand) {
@@ -90,13 +98,21 @@ public class WebSocketHandler {
             }
 
             if(!joinedTheCorrectColor) {
-                theSession.getRemote().sendString("Error: Did not join a color that is registered to you");
+                sendMessage(theSession, new ErrorMessage("Error: Did not join a color that is registered to you"));
             } else {
-                //implemented once I have done server messages
-                //connections.broadcast(theUsername, );
-            }
-        } else {
+                connections.broadcast(theUsername, new NotificationMessage(
+                        "%s has joined the game %s as %s".formatted(theUsername,
+                                theConnectCommand.getGameID(), ((JoinCommand) theConnectCommand).getPlayerColor())));
 
+                sendMessage(theSession, new LoadGameMessage(gameData.game().getBoard()));
+            }
+            //observer joined
+        } else {
+            connections.broadcast(theUsername, new NotificationMessage(
+                    "%s has joined game %s as an observer".formatted(theUsername,
+                            theConnectCommand.getGameID())));
+
+            sendMessage(theSession, new LoadGameMessage(gameData.game().getBoard()));
         }
     }
 
@@ -149,5 +165,9 @@ public class WebSocketHandler {
         private void addSession(Session theSession) {
             sessionMap.put(theSession, 0);
         }
+    }
+
+    public void sendMessage(Session theSession, ServerMessage theMessage) throws IOException {
+        theSession.getRemote().sendString(new Gson().toJson(theMessage));
     }
 }

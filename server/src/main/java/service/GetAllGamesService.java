@@ -37,8 +37,4 @@ public class GetAllGamesService extends AuthService {
 
         return new GetAllGameResult(games);
     }
-
-    public GameDAO getGameData() {
-        return myGameData;
-    }
 }

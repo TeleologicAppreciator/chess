@@ -57,7 +57,7 @@ public class Server {
         myJoinGameHandler = new JoinGameHandler(new JoinGameService(myAuthDatabase, myGameDatabase));
 
         myAuthService = new AuthService(myAuthDatabase);
-        webSocketHandler = new WebSocketHandler(myAuthService, new GetAllGamesService(myAuthDatabase, myGameDatabase));
+        webSocketHandler = new WebSocketHandler(myAuthService, new JoinGameService(myAuthDatabase, myGameDatabase));
     }
 
     public int run(int desiredPort) {
