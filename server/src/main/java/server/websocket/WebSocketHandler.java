@@ -37,7 +37,7 @@ public class WebSocketHandler {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String theMessage) {
+    public void onMessage(Session theSession, String theMessage) {
         try {
             UserGameCommand command = new Gson().fromJson(theMessage, UserGameCommand.class);
 
@@ -48,25 +48,25 @@ public class WebSocketHandler {
             }
             String username = usernameContainer.username();
 
-            sessions.saveSession(command.getGameID(), session);
+            sessions.saveSession(command.getGameID(), theSession);
 
             switch (command.getCommandType()) {
-                case CONNECT -> connect(session, username, command);
-                case MAKE_MOVE -> makeMove(session, username, (MakeMoveCommand) command);
-                case LEAVE -> leaveGame(session, username, command);
-                case RESIGN -> resign(session, username, command);
+                case CONNECT -> connect(theSession, username, command);
+                case MAKE_MOVE -> makeMove(theSession, username, (MakeMoveCommand) command);
+                case LEAVE -> leaveGame(theSession, username, command);
+                case RESIGN -> resign(theSession, username, command);
             }
         } catch (DataAccessException e) {
             // Serializes and sends the error message
             try {
-                session.getRemote().sendString("Error: unauthorized");
+                theSession.getRemote().sendString("Error: unauthorized");
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                session.getRemote().sendString("Error: " + e.getMessage());
+                theSession.getRemote().sendString("Error: " + e.getMessage());
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
