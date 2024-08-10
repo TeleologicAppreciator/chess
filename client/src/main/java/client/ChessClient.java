@@ -167,8 +167,7 @@ public class ChessClient implements ServerMessageObserver {
 
         state = State.GAMEPLAY;
 
-        redrawChessBoard();
-        return "successfully joined game";
+        return "";
     }
 
     private void executeHTTPJoin(JoinData theDataOfGameToJoin) {
@@ -208,7 +207,6 @@ public class ChessClient implements ServerMessageObserver {
 
         state = State.GAMEPLAY;
 
-        redrawChessBoard();
         return "successfully observing game";
     }
 
@@ -250,7 +248,7 @@ public class ChessClient implements ServerMessageObserver {
 
         //need to load the game from the server message
 
-        return "Successfully made the move";
+        return "";
     }
 
     private static ChessPiece.PieceType getPieceType(String[] params) {
@@ -398,11 +396,12 @@ public class ChessClient implements ServerMessageObserver {
             return "Cannot leave a game you aren't currently viewing";
         }
 
-        server.leave(gameIDSaved, authData);
         state = State.SIGNEDIN;
+        server.leave(gameIDSaved, authData);
+
         gameIDSaved = -1;
 
-        return "successfully left game";
+        return "Successfully left the game";
     }
 
     public String resign() {
@@ -412,7 +411,7 @@ public class ChessClient implements ServerMessageObserver {
 
         server.resign(gameIDSaved, authData);
 
-        return "successfully resigned";
+        return "";
     }
 
     public String logout() throws Exception {
@@ -445,8 +444,8 @@ public class ChessClient implements ServerMessageObserver {
         else {
             return """
                     redraw - the chess board
-                    legalMoves - highlights all of the moves the chess piece can do
-                    makeMove <start position of chess piece> <end position of chess piece> {pawn promotion piece type} 
+                    legal <position of chess piece> - highlights all of the moves the chess piece can do
+                    move <start position of chess piece> <end position of chess piece> {pawn promotion piece type} 
                     - move the chess piece [***example***] d7 d8 queen.
                     - pawn promotion is optional, only for moves that would promote a pawn
                     resign - concede victory to opponent
@@ -512,20 +511,23 @@ public class ChessClient implements ServerMessageObserver {
         }
     }
 
-    private void notifyClient(NotificationMessage theNotification) {
+    public void notifyClient(NotificationMessage theNotification) {
         System.out.println("[NOTIFICATION] >>> "
                 + theNotification.getMessage());
+        System.out.print("[GAMEPLAY] >>> ");
     }
 
-    private void notifyError(ErrorMessage theError) {
-        System.out.println("[ERROR] >>> "
-                + theError.getErrorMessage());
+    public void notifyError(ErrorMessage theError) {
+        System.out.println(theError.getErrorMessage());
+        System.out.print("[GAMEPLAY] >>> ");
     }
 
-    private void loadGame(LoadGameMessage theGameToLoad) {
+    public void loadGame(LoadGameMessage theGameToLoad) {
+        System.out.println();
         ChessGame game = theGameToLoad.getGame();
         ChessBoardDrawer.updateGame(game);
         ChessBoardDrawer.drawChessBoard();
+        System.out.print("[GAMEPLAY] >>> ");
     }
 }
 

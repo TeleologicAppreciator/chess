@@ -8,8 +8,8 @@ import javax.websocket.*;
 import java.net.URI;
 
 public class WebSocketCommunicator extends Endpoint {
-    private Session session;
-    private ServerMessageObserver observer;
+    private final Session session;
+    private final ServerMessageObserver observer;
 
     public WebSocketCommunicator(String url, ServerMessageObserver theObserver) throws Exception {
         try {
@@ -25,11 +25,14 @@ public class WebSocketCommunicator extends Endpoint {
                 public void onMessage(String theMessage) {
                     try {
                         ServerMessage serverMessage = new Gson().fromJson(theMessage, ServerMessage.class);
-
-                        observer.notify(serverMessage);
+                        switch (serverMessage.getServerMessageType()) {
+                            case NOTIFICATION -> observer.notifyClient(
+                                    new Gson().fromJson(theMessage, NotificationMessage.class));
+                            case ERROR -> observer.notifyError(new Gson().fromJson(theMessage, ErrorMessage.class));
+                            case LOAD_GAME -> observer.loadGame(new Gson().fromJson(theMessage, LoadGameMessage.class));
+                        }
                     } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                        //send to error in client
+                        observer.notifyError(new ErrorMessage(e.getMessage()));
                     }
                 }
             });

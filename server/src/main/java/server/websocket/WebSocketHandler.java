@@ -98,9 +98,9 @@ public class WebSocketHandler {
     }
 
     private ChessGame.TeamColor getTeamColorFromUsername(GameData gameData, String theUsername) {
-        if(gameData.whiteUsername().equals(theUsername)) {
+        if(gameData.whiteUsername() != null && gameData.whiteUsername().equals(theUsername)) {
             return ChessGame.TeamColor.WHITE;
-        } else if (gameData.blackUsername().equals(theUsername)) {
+        } else if (gameData.blackUsername() != null && gameData.blackUsername().equals(theUsername)) {
             return ChessGame.TeamColor.BLACK;
         } else {
             return null;
@@ -237,11 +237,11 @@ public class WebSocketHandler {
     }
 
     private ChessGame.TeamColor getTeamColor(String theUsername, GameData theGameData) {
-        if (theUsername.equals(theGameData.whiteUsername())) {
+        if (theGameData.whiteUsername() != null && theUsername.equals(theGameData.whiteUsername())) {
             return ChessGame.TeamColor.WHITE;
         }
 
-        if (theUsername.equals(theGameData.blackUsername())) {
+        if (theGameData.blackUsername() != null && theUsername.equals(theGameData.blackUsername())) {
             return ChessGame.TeamColor.BLACK;
         }
 

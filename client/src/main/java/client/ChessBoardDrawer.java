@@ -13,6 +13,7 @@ public class ChessBoardDrawer {
 
     public ChessBoardDrawer(ChessGame theChessGame, boolean isBlackPerspective) {
         game = theChessGame;
+        ChessBoardDrawer.isBlackPerspective = isBlackPerspective;
     }
 
     public static void updateGame(ChessGame theChessGame) {
