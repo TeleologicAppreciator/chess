@@ -1,14 +1,18 @@
 package websocket.messages;
 
-public class NotificationMessage extends ServerMessage {
-    private String notificationMessage;
+import com.google.gson.Gson;
 
-    public NotificationMessage(String theNotificationMessage) {
+public class NotificationMessage extends ServerMessage{
+
+    String message;
+
+    public NotificationMessage(String theNotification) {
         super(ServerMessageType.NOTIFICATION);
-        notificationMessage = theNotificationMessage;
+        message = theNotification;
     }
 
-    public String getNotificationMessage() {
-        return notificationMessage;
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

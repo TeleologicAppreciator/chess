@@ -1,5 +1,7 @@
-package facade;
+package client;
 
+import chess.ChessMove;
+import client.websocket.WebSocketCommunicator;
 import com.google.gson.Gson;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
@@ -10,15 +12,52 @@ import model.GameData;
 import model.JoinData;
 import model.UserData;
 import result.GetAllGameResult;
+import websocket.commands.JoinCommand;
+import websocket.commands.MakeMoveCommand;
+import websocket.commands.UserGameCommand;
 
 import java.io.*;
 import java.net.*;
 
 public class ServerFacade {
     private final String serverUrl;
+    private WebSocketCommunicator webSocketCommunications;
 
     public ServerFacade(String theUrl) {
         serverUrl = theUrl;
+    }
+
+    public void watchWebSocket() {
+        try {
+            webSocketCommunications = new WebSocketCommunicator(serverUrl);
+        } catch (Exception e) {
+            System.out.println("Error: failed to connect to websocket");
+        }
+    }
+
+    public void issueCommand(UserGameCommand theCommand) {
+        String jsonCommand = new Gson().toJson(theCommand);
+        webSocketCommunications.sendMessage(jsonCommand);
+    }
+
+    public void joinPlayer(int theGameID, AuthData theAuthData, String theColorToPlay) {
+        issueCommand(new JoinCommand(theGameID, theAuthData.authToken(), theColorToPlay));
+    }
+
+    public void joinObserver(int theGameID, AuthData theAuthData) {
+        issueCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, theAuthData.authToken(), theGameID));
+    }
+
+    public void makeMove(int theGameID, AuthData theAuthToken, ChessMove theMove) {
+        issueCommand(new MakeMoveCommand(theGameID, theAuthToken.authToken(), theMove));
+    }
+
+    public void leave(int theGameID, AuthData theAuthData) {
+        issueCommand(new UserGameCommand(UserGameCommand.CommandType.LEAVE, theAuthData.authToken(), theGameID));
+    }
+
+    public void resign(int theGameID, AuthData theAuthData) {
+        issueCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, theAuthData.authToken(), theGameID));
     }
 
     public AuthData registerUser (UserData theRegisteringUser) throws Exception {

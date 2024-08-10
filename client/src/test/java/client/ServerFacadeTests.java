@@ -6,7 +6,6 @@ import model.JoinData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
-import facade.ServerFacade;
 
 import static org.junit.jupiter.api.Assertions.*;
 
