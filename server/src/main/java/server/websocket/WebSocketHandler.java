@@ -122,13 +122,13 @@ public class WebSocketHandler {
             return;
         }
 
-        if(!game.getTeamTurn().equals(userMoveColor)) {
-            sendOnlyToUser(theSession, new ErrorMessage("Error: It is not your turn to move"));
+        if(game.isGameOver() || game.isInCheckmate(userMoveColor) || game.isInStalemate(userMoveColor)) {
+            sendOnlyToUser(theSession, new ErrorMessage("Error: The game is over."));
             return;
         }
 
-        if(game.isGameOver() || game.isInCheckmate(userMoveColor) || game.isInStalemate(userMoveColor)) {
-            sendOnlyToUser(theSession, new ErrorMessage("Error: The game is over."));
+        if(!game.getTeamTurn().equals(userMoveColor)) {
+            sendOnlyToUser(theSession, new ErrorMessage("Error: It is not your turn to move"));
             return;
         }
 
@@ -143,7 +143,7 @@ public class WebSocketHandler {
 
         sessions.broadcast(theSession, new NotificationMessage("%s playing as %s moved %s from %s to %s".formatted(
                 theUsername, userMoveColor,
-                game.getBoard().getPiece(moveCommand.getMove().getStartPosition()),
+                game.getBoard().getPiece(moveCommand.getMove().getEndPosition()).getFullString(),
                 moveCommand.getMove().getStartPosition().toString(),
                 moveCommand.getMove().getEndPosition().toString())), moveCommand.getGameID());
 

@@ -11,7 +11,6 @@ import model.UserData;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 
@@ -110,7 +109,6 @@ public class ChessClient implements ServerMessageObserver {
         }        //the server does not grab the gameID int value
         server.createGame(new GameData(0, null, null, gameName, null), authData);
 
-
         return ("Successfully created game: " + gameName);
     }
 
@@ -129,7 +127,7 @@ public class ChessClient implements ServerMessageObserver {
         } else {
             throw new Exception("Input invalid please make sure you enter valid game ID from the list");
         }
-        if(playerColor == null || !(playerColor.equalsIgnoreCase("white") || playerColor.equalsIgnoreCase("black"))) {
+        if(playerColor == null || (!playerColor.equalsIgnoreCase("white") && !playerColor.equalsIgnoreCase("black"))) {
             throw new Exception("You must specify a valid color to join a game");
         }
         if(clientGameID > clientListedGameData.length) {
@@ -138,6 +136,16 @@ public class ChessClient implements ServerMessageObserver {
         var game = clientListedGameData[clientGameID - 1];
 
         var serverGameID = game.gameID();
+
+        if(playerColor.equalsIgnoreCase("white")) {
+            if(game.whiteUsername() != null && !game.whiteUsername().equals(authData.username())) {
+                return "Error: color already taken";
+            }
+        } else if(playerColor.equalsIgnoreCase("black")) {
+            if(game.blackUsername() != null && !game.blackUsername().equals(authData.username())) {
+                return "Error: color already taken";
+            }
+        }
 
         //add ourselves to the game if we are not already registered
         if((playerColor.equalsIgnoreCase("white") && game.whiteUsername() == null)
@@ -191,6 +199,7 @@ public class ChessClient implements ServerMessageObserver {
 
         int serverGameID = clientListedGameData[gameID - 1].gameID();
 
+        server.watchWebSocket();
         server.joinObserver(serverGameID, authData);
 
         chessBoardDrawer = new ChessBoardDrawer(clientListedGameData[gameID - 1].game(), true);
