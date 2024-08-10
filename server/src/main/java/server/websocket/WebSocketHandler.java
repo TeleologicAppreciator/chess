@@ -149,6 +149,10 @@ public class WebSocketHandler {
 
         NotificationMessage notificationMessage = null;
 
+        if(game.isInCheck(opponentColor)) {
+            notificationMessage = new NotificationMessage("%s is in check!".formatted(opponentColor.toString()));
+        }
+
         if(game.isInCheckmate(opponentColor)) {
             game.setGameOver();
 
@@ -162,10 +166,9 @@ public class WebSocketHandler {
             notificationMessage = new NotificationMessage("Stalemate! The game ends in a draw!");
         }
 
-        if(game.isInCheck(opponentColor)) {
-            game.setGameOver();
-
-            notificationMessage = new NotificationMessage("%s is in check!".formatted(opponentColor.toString()));
+        if(notificationMessage != null) {
+            sendOnlyToUser(theSession, notificationMessage);
+            sessions.broadcast(theSession, notificationMessage, moveCommand.getGameID());
         }
 
         var debug = game.getTeamTurn();
@@ -229,8 +232,16 @@ public class WebSocketHandler {
         game.setGameOver();
         gameService.getGameData().updateLiveGame(gameData);
 
+        String opponentUsername = null;
+
+        if(userColor == ChessGame.TeamColor.WHITE) {
+            opponentUsername = gameData.blackUsername();
+        } else {
+            opponentUsername = gameData.whiteUsername();
+        }
+
         var resignNotification = new NotificationMessage(
-                "%s has resigned, %s wins!".formatted(theUsername, opponentColor.toString()));
+                "%s has resigned, %s wins!".formatted(theUsername, opponentUsername));
 
         sendOnlyToUser(theSession, resignNotification);
         sessions.broadcast(theSession, resignNotification, theResignCommand.getGameID());

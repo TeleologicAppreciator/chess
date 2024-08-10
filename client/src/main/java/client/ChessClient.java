@@ -284,7 +284,6 @@ public class ChessClient implements ServerMessageObserver {
                 valid = true;
             }
         }
-
         if(!valid) {
             return false;
         }
