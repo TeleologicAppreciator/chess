@@ -59,17 +59,6 @@ public class ChessPiece {
         return " ";
     }
 
-    public String getFullString() {
-        return switch (this.toString()) {
-            case "k" -> "King";
-            case "q" -> "Queen";
-            case "b" -> "Bishop";
-            case "n" -> "Knight";
-            case "r" -> "Rook";
-            default -> "Pawn";
-        };
-    }
-
     private String whatCaseForPieceColor(String pieceTypeString) {
         if(isWhitePiece()) {
             return pieceTypeString.toUpperCase();

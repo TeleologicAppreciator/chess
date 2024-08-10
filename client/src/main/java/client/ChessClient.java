@@ -62,7 +62,6 @@ public class ChessClient implements ServerMessageObserver {
         if(state == State.GAMEPLAY) {
             return "Please leave your current game before registering a new user";
         }
-
         String username = null;
         String password = null;
         String email = null;
@@ -84,7 +83,6 @@ public class ChessClient implements ServerMessageObserver {
         if(state == State.GAMEPLAY) {
             return "You are already logged in and playing a game";
         }
-
         String username = null;
         String password = null;
         if (params.length > 1) {
@@ -104,7 +102,6 @@ public class ChessClient implements ServerMessageObserver {
         if(state == State.GAMEPLAY) {
             return "Please leave your current game before creating a new game";
         }
-
         String gameName = null;
         if (params.length > 0) {
             gameName = params[0];
@@ -121,11 +118,9 @@ public class ChessClient implements ServerMessageObserver {
         if(state == State.GAMEPLAY) {
             return "Please leave your current game before joining a new one";
         }
-
         if (clientListedGameData == null) {
             throw new Exception("You must list games before joining");
         }
-
         Integer clientGameID = null;
         String playerColor = null;
         if (params.length > 1) {
@@ -134,15 +129,12 @@ public class ChessClient implements ServerMessageObserver {
         } else {
             throw new Exception("Input invalid please make sure you enter valid game ID from the list");
         }
-
         if(playerColor == null || !(playerColor.equalsIgnoreCase("white") || playerColor.equalsIgnoreCase("black"))) {
             throw new Exception("You must specify a valid color to join a game");
         }
-
         if(clientGameID > clientListedGameData.length) {
             throw new Exception("not a valid game ID");
         }
-
         var game = clientListedGameData[clientGameID - 1];
 
         var serverGameID = game.gameID();
@@ -166,7 +158,6 @@ public class ChessClient implements ServerMessageObserver {
         gameIDSaved = serverGameID;
 
         state = State.GAMEPLAY;
-
         return "";
     }
 
@@ -206,7 +197,6 @@ public class ChessClient implements ServerMessageObserver {
         gameIDSaved = serverGameID;
 
         state = State.GAMEPLAY;
-
         return "successfully observing game";
     }
 
@@ -214,13 +204,10 @@ public class ChessClient implements ServerMessageObserver {
         if(state != State.GAMEPLAY) {
             return "Can only draw a board of a game you are currently viewing";
         }
-
         if(chessBoardDrawer == null) {
             return "Can only draw a board of a game in session";
         }
-
         chessBoardDrawer.drawChessBoard();
-
         return "here is the chess board";
     }
 
@@ -228,11 +215,9 @@ public class ChessClient implements ServerMessageObserver {
         if(state != State.GAMEPLAY) {
             return "You cannot make a move in a game you aren't playing";
         }
-
         if(params.length < 2) {
             throw new Exception("You must specify a start and end position to move");
         }
-
         ChessPosition startPosition = getChessPositionFromInput(params[0]);
         ChessPosition endPosition = getChessPositionFromInput(params[1]);
 
@@ -245,9 +230,6 @@ public class ChessClient implements ServerMessageObserver {
         ChessMove moveToPushToServer = new ChessMove(startPosition, endPosition, promotionType);
 
         server.makeMove(gameIDSaved, authData, moveToPushToServer);
-
-        //need to load the game from the server message
-
         return "";
     }
 
@@ -279,7 +261,6 @@ public class ChessClient implements ServerMessageObserver {
 
         int row = Integer.parseInt(secondChar);
         int col = convertAlphabetPositionToNumber(firstChar);
-
         return new ChessPosition(row, col);
     }
 
@@ -289,7 +270,6 @@ public class ChessClient implements ServerMessageObserver {
         }
 
         boolean valid = false;
-
         for (char c = 'a'; c <= 'h'; c++) {
             if(theInput.charAt(0) == c) {
                 valid = true;
@@ -299,13 +279,11 @@ public class ChessClient implements ServerMessageObserver {
         if(!valid) {
             return false;
         }
-
         for(int i = 0; i <= 8; i++) {
             if(theInput.substring(1, 2).equals(Integer.toString(i))) {
                 valid = true;
             }
         }
-
         return valid;
     }
 
@@ -331,7 +309,6 @@ public class ChessClient implements ServerMessageObserver {
         if(theAlphaBetPosition.equals("g")){
             return 7;
         }
-
         return 8;
     }
 
@@ -351,15 +328,12 @@ public class ChessClient implements ServerMessageObserver {
             } else {
                 constructedListOFAllGames.append(listOfAllGames[i].whiteUsername());
             }
-
             constructedListOFAllGames.append("  Black player: ");
             if(listOfAllGames[i].blackUsername() == null) {
                 constructedListOFAllGames.append("-empty-");
             } else {
                 constructedListOFAllGames.append(listOfAllGames[i].blackUsername());
-
             }
-
             constructedListOFAllGames.append("\n");
         }
 
@@ -367,7 +341,6 @@ public class ChessClient implements ServerMessageObserver {
         if(result.isEmpty()) {
             return "no games currently created";
         }
-
         return result;
     }
 
@@ -379,15 +352,12 @@ public class ChessClient implements ServerMessageObserver {
         if(params.length < 1) {
             return "You must input the position of the piece you want to view valid moves of";
         }
-
         ChessPosition positionOfPieceToDrawValidMoves = getChessPositionFromInput(params[0]);
 
         if(positionOfPieceToDrawValidMoves == null) {
             return "You must input the position of the piece you want to view valid moves of";
         }
-
         chessBoardDrawer.drawValidMoves(positionOfPieceToDrawValidMoves);
-
         return "here are the valid moves";
     }
 
@@ -400,7 +370,6 @@ public class ChessClient implements ServerMessageObserver {
         server.leave(gameIDSaved, authData);
 
         gameIDSaved = -1;
-
         return "Successfully left the game";
     }
 
@@ -410,7 +379,6 @@ public class ChessClient implements ServerMessageObserver {
         }
 
         server.resign(gameIDSaved, authData);
-
         return "";
     }
 
@@ -440,8 +408,7 @@ public class ChessClient implements ServerMessageObserver {
                quit - playing chess
                help - with possible commands
                """;
-        }
-        else {
+        } else {
             return """
                     redraw - the chess board
                     legal <position of chess piece> - highlights all of the moves the chess piece can do
@@ -503,14 +470,6 @@ public class ChessClient implements ServerMessageObserver {
         return chessBoardDrawer;
     }
 
-    public void notify(ServerMessage theMessage) {
-        switch(theMessage.getServerMessageType()) {
-            case NOTIFICATION -> notifyClient((NotificationMessage) theMessage);
-            case ERROR -> notifyError((ErrorMessage) theMessage);
-            case LOAD_GAME -> loadGame((LoadGameMessage) theMessage);
-        }
-    }
-
     public void notifyClient(NotificationMessage theNotification) {
         System.out.println("[NOTIFICATION] >>> "
                 + theNotification.getMessage());
@@ -530,4 +489,3 @@ public class ChessClient implements ServerMessageObserver {
         System.out.print("[GAMEPLAY] >>> ");
     }
 }
-
