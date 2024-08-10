@@ -35,18 +35,10 @@ public class WebSocketSessions {
 
     public synchronized void broadcast(Session excludeUserWhoMadeAction, ServerMessage theNotification, Integer affectedGameID)
             throws IOException {
-        var removeList = new ArrayList<Session>();
         for (var c : sessionMap.keySet()) {
             if (c.isOpen() && sessionMap.get(c).contains(affectedGameID)) {
                 sendMessageIfNotSource(c, excludeUserWhoMadeAction, theNotification);
-            } else {
-                removeList.add(c);
             }
-        }
-
-        // Clean up any connections that were left open.
-        for (var c : removeList) {
-            sessionMap.remove(c);
         }
     }
 

@@ -54,8 +54,6 @@ public class WebSocketHandler {
             }
             String username = usernameContainer.username();
 
-            sessions.addSession(theSession, command.getGameID());
-
             switch (command.getCommandType()) {
                 case CONNECT -> join(theSession, username, command);
                 case MAKE_MOVE -> makeMove(theSession, username, theMessage);
@@ -95,6 +93,8 @@ public class WebSocketHandler {
         LoadGameMessage loadGame = new LoadGameMessage(gameData.game());
 
         sendOnlyToUser(theSession, loadGame);
+
+        sessions.addSession(theSession, theConnectCommand.getGameID());
     }
 
     private ChessGame.TeamColor getTeamColorFromUsername(GameData gameData, String theUsername) {
@@ -198,7 +198,7 @@ public class WebSocketHandler {
             sessions.broadcast(theSession, new NotificationMessage("%s has left the game.".formatted(theUsername)),
                     theLeaveCommand.getGameID());
 
-            theSession.close();
+            sessions.removeSessionFromGame(theSession, theLeaveCommand.getGameID());
         } catch(IOException e) {
             try {
                 sendOnlyToUser(theSession, new ErrorMessage("Error: invalid connection"));

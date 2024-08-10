@@ -21,14 +21,16 @@ import java.net.*;
 public class ServerFacade {
     private final String serverUrl;
     private WebSocketCommunicator webSocketCommunications;
+    private ChessClient clientThatObservesServer;
 
-    public ServerFacade(String theUrl) {
+    public ServerFacade(String theUrl, ChessClient theClient) {
         serverUrl = theUrl;
+        clientThatObservesServer = theClient;
     }
 
     public void watchWebSocket() {
         try {
-            webSocketCommunications = new WebSocketCommunicator(serverUrl);
+            webSocketCommunications = new WebSocketCommunicator(serverUrl, clientThatObservesServer);
         } catch (Exception e) {
             System.out.println("Error: failed to connect to websocket");
         }

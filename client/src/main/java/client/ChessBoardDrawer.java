@@ -8,18 +8,18 @@ import chess.ChessPosition;
 import java.util.Collection;
 
 public class ChessBoardDrawer {
-    private ChessGame game;
-    private boolean isBlackPerspective;
+    private static ChessGame game;
+    private static boolean isBlackPerspective;
 
     public ChessBoardDrawer(ChessGame theChessGame, boolean isBlackPerspective) {
         game = theChessGame;
     }
 
-    public void updateGame(ChessGame theChessGame) {
+    public static void updateGame(ChessGame theChessGame) {
         game = theChessGame;
     }
 
-    public void drawChessBoard() {
+    public static void drawChessBoard() {
         System.out.print(EscapeSequences.SET_TEXT_BOLD);
 
         //line 1
@@ -30,7 +30,7 @@ public class ChessBoardDrawer {
         resetConsole();
     }
 
-    public void drawValidMoves(ChessPosition thePositionOfPieceToDrawValidMoves) {
+    public static void drawValidMoves(ChessPosition thePositionOfPieceToDrawValidMoves) {
         System.out.print(EscapeSequences.SET_TEXT_BOLD);
 
         drawChessTop(isBlackPerspective);
@@ -40,7 +40,7 @@ public class ChessBoardDrawer {
         resetConsole();
     }
 
-    private void drawChessBoardBody(boolean isBlackPerspective, ChessPosition thePositionOfPieceToDrawValidMoves) {
+    private static void drawChessBoardBody(boolean isBlackPerspective, ChessPosition thePositionOfPieceToDrawValidMoves) {
         Collection<ChessMove> validMoves = null;
         if(thePositionOfPieceToDrawValidMoves != null) {
             validMoves = game.validMoves(thePositionOfPieceToDrawValidMoves);
@@ -53,7 +53,7 @@ public class ChessBoardDrawer {
         }
     }
 
-    private void drawChessBodyBlackPerspective(Collection<ChessMove> validMoves) {
+    private static void drawChessBodyBlackPerspective(Collection<ChessMove> validMoves) {
         for (int row = 1; row <= 8; ++row) {
             System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
             drawChessSide(row);
@@ -70,7 +70,7 @@ public class ChessBoardDrawer {
         }
     }
 
-    private void drawChessBodyWhitePerspective(Collection<ChessMove> validMoves) {
+    private static void drawChessBodyWhitePerspective(Collection<ChessMove> validMoves) {
         for (int row = 8; row > 0; --row) {
             System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
             drawChessSide(row);
@@ -87,7 +87,7 @@ public class ChessBoardDrawer {
         }
     }
 
-    private boolean isValidMovePosition(int row, int column, Collection<ChessMove> validMoves) {
+    private static boolean isValidMovePosition(int row, int column, Collection<ChessMove> validMoves) {
         if(validMoves == null) {
             return false;
         }
@@ -105,7 +105,7 @@ public class ChessBoardDrawer {
         return positionToCheckIsValidMove;
     }
 
-    private void correctTileOrder(int row, int column, boolean isValidMoveSquare) {
+    private static void correctTileOrder(int row, int column, boolean isValidMoveSquare) {
         if (row % 2 == 0) {
             whiteTilesFirst(column, isValidMoveSquare);
         } else {
@@ -113,7 +113,7 @@ public class ChessBoardDrawer {
         }
     }
 
-    private void whiteTilesFirst(int column, boolean isValidMoveSquare) {
+    private static void whiteTilesFirst(int column, boolean isValidMoveSquare) {
         if (column % 2 == 0) {
             if (isValidMoveSquare) {
                 System.out.print(EscapeSequences.SET_BG_COLOR_GREEN);
@@ -129,7 +129,7 @@ public class ChessBoardDrawer {
         }
     }
 
-    private void blackTilesFirst(int column, boolean isValidMoveSquare) {
+    private static void blackTilesFirst(int column, boolean isValidMoveSquare) {
         if (column % 2 == 0) {
             if (isValidMoveSquare) {
                 System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
@@ -145,7 +145,7 @@ public class ChessBoardDrawer {
         }
     }
 
-    private void finishChessBoardLine(int row) {
+    private static void finishChessBoardLine(int row) {
         System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
         System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
         drawChessSide(row);
@@ -154,7 +154,7 @@ public class ChessBoardDrawer {
         System.out.println();
     }
 
-    private void printChessPiece(int row, int column) {
+    private static void printChessPiece(int row, int column) {
         ChessPiece currentPiece = game.getBoard().getPiece(new ChessPosition(row, column + 1));
         if (currentPiece != null) {
             if (currentPiece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
@@ -171,7 +171,7 @@ public class ChessBoardDrawer {
         }
     }
 
-    private void drawChessTop(boolean isBlackPerspective) {
+    private static void drawChessTop(boolean isBlackPerspective) {
         System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
         System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
         System.out.print(EscapeSequences.EMPTY);
@@ -195,13 +195,13 @@ public class ChessBoardDrawer {
         System.out.println();
     }
 
-    private void drawChessSide(int theLineNumber) {
+    private static void drawChessSide(int theLineNumber) {
         System.out.print(" ");
         System.out.print(theLineNumber);
         System.out.print(" ");
     }
 
-    private void resetConsole() {
+    private static void resetConsole() {
         System.out.println();
         System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
         System.out.print(EscapeSequences.RESET_TEXT_BOLD_FAINT);

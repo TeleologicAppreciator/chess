@@ -8,10 +8,14 @@ import model.AuthData;
 import model.GameData;
 import model.JoinData;
 import model.UserData;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 
-public class ChessClient {
+public class ChessClient implements ServerMessageObserver {
     private final ServerFacade server;
     private final String serverUrl;
     private String visitorName = null;
@@ -19,12 +23,11 @@ public class ChessClient {
     private AuthData authData = null;
     private GameData[] clientListedGameData = null;
 
-
-    private ChessBoardDrawer chessBoardDrawer = null;
+    private static ChessBoardDrawer chessBoardDrawer = null;
     int gameIDSaved;
 
     public ChessClient(String theServerUrl) {
-        server = new ServerFacade(theServerUrl);
+        server = new ServerFacade(theServerUrl, this);
         serverUrl = theServerUrl;
     }
 
@@ -56,6 +59,10 @@ public class ChessClient {
     }
 
     public String register(String... params) throws Exception {
+        if(state == State.GAMEPLAY) {
+            return "Please leave your current game before registering a new user";
+        }
+
         String username = null;
         String password = null;
         String email = null;
@@ -74,6 +81,10 @@ public class ChessClient {
     }
 
     public String login(String... params) throws Exception {
+        if(state == State.GAMEPLAY) {
+            return "You are already logged in and playing a game";
+        }
+
         String username = null;
         String password = null;
         if (params.length > 1) {
@@ -90,6 +101,10 @@ public class ChessClient {
     }
 
     public String createGame(String... params) throws Exception {
+        if(state == State.GAMEPLAY) {
+            return "Please leave your current game before creating a new game";
+        }
+
         String gameName = null;
         if (params.length > 0) {
             gameName = params[0];
@@ -103,6 +118,10 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws Exception {
+        if(state == State.GAMEPLAY) {
+            return "Please leave your current game before joining a new one";
+        }
+
         if (clientListedGameData == null) {
             throw new Exception("You must list games before joining");
         }
@@ -124,14 +143,17 @@ public class ChessClient {
             throw new Exception("not a valid game ID");
         }
 
-        var serverGameID = clientListedGameData[clientGameID - 1].gameID();
+        var game = clientListedGameData[clientGameID - 1];
 
-        JoinData dataOfGameToJoin = new JoinData(playerColor, serverGameID);
+        var serverGameID = game.gameID();
 
-        try {
-            server.joinGame(dataOfGameToJoin, authData);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        //add ourselves to the game if we are not already registered
+        if((playerColor.equalsIgnoreCase("white") && game.whiteUsername() == null)
+                || (playerColor.equalsIgnoreCase("black") && game.blackUsername() == null)) {
+
+            JoinData dataOfGameToJoin = new JoinData(playerColor, serverGameID);
+
+            executeHTTPJoin(dataOfGameToJoin);
         }
 
         server.watchWebSocket();
@@ -149,7 +171,19 @@ public class ChessClient {
         return "successfully joined game";
     }
 
+    private void executeHTTPJoin(JoinData theDataOfGameToJoin) {
+        try {
+            server.joinGame(theDataOfGameToJoin, authData);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public String observe(String... params) throws Exception {
+        if(state == State.GAMEPLAY) {
+            return "Please leave your current game before observing a new one";
+        }
+
         if (clientListedGameData == null) {
             throw new Exception("You must list games before joining");
         }
@@ -213,6 +247,8 @@ public class ChessClient {
         ChessMove moveToPushToServer = new ChessMove(startPosition, endPosition, promotionType);
 
         server.makeMove(gameIDSaved, authData, moveToPushToServer);
+
+        //need to load the game from the server message
 
         return "Successfully made the move";
     }
@@ -462,6 +498,34 @@ public class ChessClient {
             };
             default -> errorMessage;
         };
+    }
+
+    public static ChessBoardDrawer getChessBoardDrawer() {
+        return chessBoardDrawer;
+    }
+
+    public void notify(ServerMessage theMessage) {
+        switch(theMessage.getServerMessageType()) {
+            case NOTIFICATION -> notifyClient((NotificationMessage) theMessage);
+            case ERROR -> notifyError((ErrorMessage) theMessage);
+            case LOAD_GAME -> loadGame((LoadGameMessage) theMessage);
+        }
+    }
+
+    private void notifyClient(NotificationMessage theNotification) {
+        System.out.println("[NOTIFICATION] >>> "
+                + theNotification.getMessage());
+    }
+
+    private void notifyError(ErrorMessage theError) {
+        System.out.println("[ERROR] >>> "
+                + theError.getErrorMessage());
+    }
+
+    private void loadGame(LoadGameMessage theGameToLoad) {
+        ChessGame game = theGameToLoad.getGame();
+        ChessBoardDrawer.updateGame(game);
+        ChessBoardDrawer.drawChessBoard();
     }
 }
 

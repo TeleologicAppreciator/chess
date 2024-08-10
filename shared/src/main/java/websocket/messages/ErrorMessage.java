@@ -10,6 +10,10 @@ public class ErrorMessage extends ServerMessage {
         errorMessage = theError;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
     @Override
     public String toString() {
         return new Gson().toJson(this);
