@@ -12,7 +12,6 @@ import model.GameData;
 import model.JoinData;
 import model.UserData;
 import result.GetAllGameResult;
-import websocket.commands.JoinCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 
@@ -41,7 +40,7 @@ public class ServerFacade {
     }
 
     public void joinPlayer(int theGameID, AuthData theAuthData, String theColorToPlay) {
-        issueCommand(new JoinCommand(theGameID, theAuthData.authToken(), theColorToPlay));
+        issueCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, theAuthData.authToken(), theGameID));
     }
 
     public void joinObserver(int theGameID, AuthData theAuthData) {

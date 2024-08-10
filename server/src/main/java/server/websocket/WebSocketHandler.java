@@ -34,12 +34,12 @@ public class WebSocketHandler {
 
     @OnWebSocketConnect
     public void onConnect(Session theSession) {
-        sessions.addSession(theSession, 0);
+        sessions.startup(theSession);
     }
 
     @OnWebSocketClose
     public void onClose(Session theSession, int theStatusCode, String theReason) {
-        sessions.removeSession(0);
+        sessions.removeSessionFromWebSocket(theSession);
     }
 
     @OnWebSocketMessage
@@ -54,6 +54,8 @@ public class WebSocketHandler {
             }
             String username = usernameContainer.username();
 
+            sessions.addSession(theSession, command.getGameID());
+
             switch (command.getCommandType()) {
                 case CONNECT -> join(theSession, username, command);
                 case MAKE_MOVE -> makeMove(theSession, username, theMessage);
@@ -63,6 +65,7 @@ public class WebSocketHandler {
         } catch (DataAccessException e) {
             sendOnlyToUser(theSession, new ErrorMessage("Error: unauthorized"));
         } catch (Exception e) {
+            var ex = e.getMessage();
             sendOnlyToUser(theSession, new ErrorMessage("Error: " + e.getMessage()));
         }
     }
@@ -72,13 +75,7 @@ public class WebSocketHandler {
 
         GameData gameData = gameService.getGameData().getGame(theConnectCommand.getGameID());
 
-        ChessGame.TeamColor playerColor = null;
-
-        if(gameData.whiteUsername().equals(theUsername)) {
-            playerColor = ChessGame.TeamColor.WHITE;
-        } else if (gameData.blackUsername().equals(theUsername)) {
-            playerColor = ChessGame.TeamColor.BLACK;
-        }
+        ChessGame.TeamColor playerColor = getTeamColorFromUsername(gameData, theUsername);
 
         if(playerColor == null) {
             sessions.broadcast(theSession, new NotificationMessage(
@@ -100,8 +97,19 @@ public class WebSocketHandler {
         sendOnlyToUser(theSession, loadGame);
     }
 
+    private ChessGame.TeamColor getTeamColorFromUsername(GameData gameData, String theUsername) {
+        if(gameData.whiteUsername().equals(theUsername)) {
+            return ChessGame.TeamColor.WHITE;
+        } else if (gameData.blackUsername().equals(theUsername)) {
+            return ChessGame.TeamColor.BLACK;
+        } else {
+            return null;
+        }
+    }
+
     private void makeMove(Session theSession, String theUsername, String stillJson)
             throws IOException, DataAccessException {
+
         MakeMoveCommand moveCommand = new Gson().fromJson(stillJson, MakeMoveCommand.class);
 
         GameData gameData = gameService.getGameData().getGame(moveCommand.getGameID());
@@ -160,15 +168,33 @@ public class WebSocketHandler {
             notificationMessage = new NotificationMessage("%s is in check!".formatted(opponentColor.toString()));
         }
 
-        gameService.getGameData().updateLiveGame(gameData);
+        var debug = game.getTeamTurn();
+        GameData updatedGame = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(),
+                gameData.gameName(), game);
 
-        LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
+        gameService.getGameData().updateLiveGame(updatedGame);
+
+        LoadGameMessage loadGameMessage = new LoadGameMessage(updatedGame.game());
         sendOnlyToUser(theSession, loadGameMessage);
         sessions.broadcast(theSession, loadGameMessage, moveCommand.getGameID());
     }
 
-    private void leaveGame(Session theSession, String theUsername, UserGameCommand theLeaveCommand) {
+    private void leaveGame(Session theSession, String theUsername, UserGameCommand theLeaveCommand)
+            throws DataAccessException {
+
         try {
+            GameData gameData = gameService.getGameData().getGame(theLeaveCommand.getGameID());
+
+            var teamColor = getTeamColor(theUsername, gameData);
+
+            if(teamColor == ChessGame.TeamColor.WHITE) {
+                gameService.getGameData().updateJoinGame("white", null, gameData);
+            }
+
+            if(teamColor == ChessGame.TeamColor.BLACK) {
+                gameService.getGameData().updateJoinGame("black", null, gameData);
+            }
+
             sessions.broadcast(theSession, new NotificationMessage("%s has left the game.".formatted(theUsername)),
                     theLeaveCommand.getGameID());
 
@@ -203,9 +229,11 @@ public class WebSocketHandler {
         game.setGameOver();
         gameService.getGameData().updateLiveGame(gameData);
 
-        sessions.broadcast(theSession, new NotificationMessage(
-                "%s has resigned, %s wins!".formatted(theUsername, opponentColor.toString())),
-                theResignCommand.getGameID());
+        var resignNotification = new NotificationMessage(
+                "%s has resigned, %s wins!".formatted(theUsername, opponentColor.toString()));
+
+        sendOnlyToUser(theSession, resignNotification);
+        sessions.broadcast(theSession, resignNotification, theResignCommand.getGameID());
     }
 
     private ChessGame.TeamColor getTeamColor(String theUsername, GameData theGameData) {

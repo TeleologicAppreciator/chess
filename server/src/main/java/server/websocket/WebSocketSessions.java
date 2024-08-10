@@ -4,35 +4,40 @@ import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WebSocketSessions {
     //map of session to gameID
-    private final Map<Session, Integer> sessionMap;
+    private final Map<Session, Set<Integer>> sessionMap;
 
     public WebSocketSessions() {
-        this.sessionMap = new HashMap<>();
+        this.sessionMap = new ConcurrentHashMap<>();
     }
 
-    public void addSession(Session theSession, Integer theGameID) {
-        sessionMap.put(theSession, theGameID);
+    public synchronized void startup(Session session) {
+        sessionMap.put(session, new HashSet<>());
     }
 
-    public void updateSession(Session theSession, Integer theGameID) {
-        sessionMap.replace(theSession, theGameID);
+    public synchronized void addSession(Session theSession, Integer theGameID) {
+        var session = sessionMap.get(theSession);
+
+        sessionMap.get(theSession).add(theGameID);
     }
 
-    public void removeSession(Integer theGameID) {
-        sessionMap.remove(theGameID);
+    public synchronized void removeSessionFromGame(Session theSession, Integer theGameID) {
+        sessionMap.get(theSession).remove(theGameID);
     }
 
-    public void broadcast(Session excludeUserWhoMadeAction, ServerMessage theNotification, int affectedGameID)
+    public synchronized void removeSessionFromWebSocket(Session theSession) {
+        sessionMap.remove(theSession);
+    }
+
+    public synchronized void broadcast(Session excludeUserWhoMadeAction, ServerMessage theNotification, Integer affectedGameID)
             throws IOException {
         var removeList = new ArrayList<Session>();
         for (var c : sessionMap.keySet()) {
-            if (c.isOpen()) {
+            if (c.isOpen() && sessionMap.get(c).contains(affectedGameID)) {
                 sendMessageIfNotSource(c, excludeUserWhoMadeAction, theNotification);
             } else {
                 removeList.add(c);
@@ -45,7 +50,7 @@ public class WebSocketSessions {
         }
     }
 
-    public void sendMessageIfNotSource(Session theSession, Session theSessionToCompare, ServerMessage theNotification)
+    public synchronized void sendMessageIfNotSource(Session theSession, Session theSessionToCompare, ServerMessage theNotification)
             throws IOException {
 
         if (!theSession.equals(theSessionToCompare)) {
@@ -53,7 +58,7 @@ public class WebSocketSessions {
         }
     }
 
-    public void send(Session theSession, String theMessageAlreadyInJson) throws IOException {
+    public synchronized void send(Session theSession, String theMessageAlreadyInJson) throws IOException {
         theSession.getRemote().sendString(theMessageAlreadyInJson);
     }
 }

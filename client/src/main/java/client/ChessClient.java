@@ -1,5 +1,9 @@
 package client;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.AuthData;
 import model.GameData;
 import model.JoinData;
@@ -14,6 +18,10 @@ public class ChessClient {
     private State state = State.SIGNEDOUT;
     private AuthData authData = null;
     private GameData[] clientListedGameData = null;
+
+
+    private ChessBoardDrawer chessBoardDrawer = null;
+    int gameIDSaved;
 
     public ChessClient(String theServerUrl) {
         server = new ServerFacade(theServerUrl);
@@ -35,6 +43,11 @@ public class ChessClient {
                 case "logout" -> logout();
                 case "register" -> register(params);
                 case "quit" -> "quit";
+                case "redraw" -> redrawChessBoard();
+                case "leave" -> leaveGame();
+                case "move" -> makeMove(params);
+                case "resign" -> resign();
+                case "legal" -> drawLegalMoves(params);
                 default -> help();
             };
         } catch (Exception e) {
@@ -85,7 +98,8 @@ public class ChessClient {
         }        //the server does not grab the gameID int value
         server.createGame(new GameData(0, null, null, gameName, null), authData);
 
-        return "Successfully created game: " + gameName;
+
+        return ("Successfully created game: " + gameName);
     }
 
     public String joinGame(String... params) throws Exception {
@@ -93,27 +107,45 @@ public class ChessClient {
             throw new Exception("You must list games before joining");
         }
 
-        Integer gameID = null;
+        Integer clientGameID = null;
         String playerColor = null;
         if (params.length > 1) {
-            gameID = Integer.parseInt(params[0]);
+            clientGameID = Integer.parseInt(params[0]);
             playerColor = params[1];
         } else {
             throw new Exception("Input invalid please make sure you enter valid game ID from the list");
         }
 
-        if(gameID > clientListedGameData.length) {
+        if(playerColor == null || !(playerColor.equalsIgnoreCase("white") || playerColor.equalsIgnoreCase("black"))) {
+            throw new Exception("You must specify a valid color to join a game");
+        }
+
+        if(clientGameID > clientListedGameData.length) {
             throw new Exception("not a valid game ID");
         }
 
-        JoinData dataOfGameToJoin = new JoinData(playerColor, clientListedGameData[gameID - 1].gameID());
-        server.joinGame(dataOfGameToJoin, authData);
+        var serverGameID = clientListedGameData[clientGameID - 1].gameID();
 
-        var drawChess = new ChessBoardDrawer(clientListedGameData[gameID - 1].game());
+        JoinData dataOfGameToJoin = new JoinData(playerColor, serverGameID);
 
-        drawChess.drawChessBoard(false);
-        drawChess.drawChessBoard(true);
+        try {
+            server.joinGame(dataOfGameToJoin, authData);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 
+        server.watchWebSocket();
+        server.joinPlayer(serverGameID, authData, playerColor);
+
+        ChessGame currentSessionGame = clientListedGameData[clientGameID - 1].game();
+
+        boolean isBlackPerspective = playerColor.equalsIgnoreCase("black");
+        chessBoardDrawer = new ChessBoardDrawer(currentSessionGame, isBlackPerspective);
+        gameIDSaved = serverGameID;
+
+        state = State.GAMEPLAY;
+
+        redrawChessBoard();
         return "successfully joined game";
     }
 
@@ -133,14 +165,140 @@ public class ChessClient {
             throw new Exception("not a valid game ID");
         }
 
-        JoinData dataOfGameToObserve = new JoinData(null, clientListedGameData[gameID - 1].gameID());
+        int serverGameID = clientListedGameData[gameID - 1].gameID();
 
-        var drawChess = new ChessBoardDrawer(clientListedGameData[gameID - 1].game());
+        server.joinObserver(serverGameID, authData);
 
-        drawChess.drawChessBoard(false);
-        drawChess.drawChessBoard(true);
+        chessBoardDrawer = new ChessBoardDrawer(clientListedGameData[gameID - 1].game(), true);
+        gameIDSaved = serverGameID;
 
+        state = State.GAMEPLAY;
+
+        redrawChessBoard();
         return "successfully observing game";
+    }
+
+    private String redrawChessBoard() {
+        if(state != State.GAMEPLAY) {
+            return "Can only draw a board of a game you are currently viewing";
+        }
+
+        if(chessBoardDrawer == null) {
+            return "Can only draw a board of a game in session";
+        }
+
+        chessBoardDrawer.drawChessBoard();
+
+        return "here is the chess board";
+    }
+
+    public String makeMove(String... params) throws Exception {
+        if(state != State.GAMEPLAY) {
+            return "You cannot make a move in a game you aren't playing";
+        }
+
+        if(params.length < 2) {
+            throw new Exception("You must specify a start and end position to move");
+        }
+
+        ChessPosition startPosition = getChessPositionFromInput(params[0]);
+        ChessPosition endPosition = getChessPositionFromInput(params[1]);
+
+        if(startPosition == null || endPosition == null) {
+            return "Must specify a valid start and end position to move";
+        }
+
+        ChessPiece.PieceType promotionType = getPieceType(params);
+
+        ChessMove moveToPushToServer = new ChessMove(startPosition, endPosition, promotionType);
+
+        server.makeMove(gameIDSaved, authData, moveToPushToServer);
+
+        return "Successfully made the move";
+    }
+
+    private static ChessPiece.PieceType getPieceType(String[] params) {
+        ChessPiece.PieceType promotionType = null;
+
+        if(params.length > 2) {
+            String promotionString = params[2];
+            if(promotionString.equalsIgnoreCase("queen")) {
+                promotionType = ChessPiece.PieceType.QUEEN;
+            } else if(promotionString.equalsIgnoreCase("rook")) {
+                promotionType = ChessPiece.PieceType.ROOK;
+            } else if(promotionString.equalsIgnoreCase("knight")) {
+                promotionType = ChessPiece.PieceType.KNIGHT;
+            } else if(promotionString.equalsIgnoreCase("bishop")) {
+                promotionType = ChessPiece.PieceType.BISHOP;
+            }
+        }
+        return promotionType;
+    }
+
+    private ChessPosition getChessPositionFromInput(String thePosition) {
+        if(!isValidChessPositionInput(thePosition)) {
+            return null;
+        }
+
+        String firstChar = thePosition.substring(0, 1);
+        String secondChar = thePosition.substring(1, 2);
+
+        int row = Integer.parseInt(secondChar);
+        int col = convertAlphabetPositionToNumber(firstChar);
+
+        return new ChessPosition(row, col);
+    }
+
+    private boolean isValidChessPositionInput(String theInput) {
+        if(theInput.length() < 2) {
+            return false;
+        }
+
+        boolean valid = false;
+
+        for (char c = 'a'; c <= 'h'; c++) {
+            if(theInput.charAt(0) == c) {
+                valid = true;
+            }
+        }
+
+        if(!valid) {
+            return false;
+        }
+
+        for(int i = 0; i <= 8; i++) {
+            if(theInput.substring(1, 2).equals(Integer.toString(i))) {
+                valid = true;
+            }
+        }
+
+        return valid;
+    }
+
+    private int convertAlphabetPositionToNumber(String theAlphaBetPosition) {
+        if(theAlphaBetPosition.equals("a")){
+            return 1;
+        }
+        if(theAlphaBetPosition.equals("b")){
+            return 2;
+        }
+        if(theAlphaBetPosition.equals("c")){
+            return 3;
+        }
+        if(theAlphaBetPosition.equals("d")){
+            return 4;
+        }
+        if(theAlphaBetPosition.equals("e")){
+            return 5;
+        }
+        if(theAlphaBetPosition.equals("f")){
+            return 6;
+        }
+        if(theAlphaBetPosition.equals("g")){
+            return 7;
+        }
+
+        return 8;
     }
 
     public String listGames() throws Exception {
@@ -179,6 +337,48 @@ public class ChessClient {
         return result;
     }
 
+    public String drawLegalMoves(String... params) {
+        if(state != State.GAMEPLAY) {
+            return "You must be viewing a game to display legal moves";
+        }
+
+        if(params.length < 1) {
+            return "You must input the position of the piece you want to view valid moves of";
+        }
+
+        ChessPosition positionOfPieceToDrawValidMoves = getChessPositionFromInput(params[0]);
+
+        if(positionOfPieceToDrawValidMoves == null) {
+            return "You must input the position of the piece you want to view valid moves of";
+        }
+
+        chessBoardDrawer.drawValidMoves(positionOfPieceToDrawValidMoves);
+
+        return "here are the valid moves";
+    }
+
+    public String leaveGame() {
+        if(state != State.GAMEPLAY) {
+            return "Cannot leave a game you aren't currently viewing";
+        }
+
+        server.leave(gameIDSaved, authData);
+        state = State.SIGNEDIN;
+        gameIDSaved = -1;
+
+        return "successfully left game";
+    }
+
+    public String resign() {
+        if(state != State.GAMEPLAY) {
+            return "Cannot resign from a game you aren't currently playing";
+        }
+
+        server.resign(gameIDSaved, authData);
+
+        return "successfully resigned";
+    }
+
     public String logout() throws Exception {
         state = State.SIGNEDOUT;
         authData = null;
@@ -195,7 +395,8 @@ public class ChessClient {
                     help - with possible commands
                     """;
         }
-        return """
+        else if (state == State.SIGNEDIN) {
+            return """
                create <NAME> - a game
                list - games
                join <ID> [WHITE|BLACK] - a game
@@ -204,6 +405,19 @@ public class ChessClient {
                quit - playing chess
                help - with possible commands
                """;
+        }
+        else {
+            return """
+                    redraw - the chess board
+                    legalMoves - highlights all of the moves the chess piece can do
+                    makeMove <start position of chess piece> <end position of chess piece> {pawn promotion piece type} 
+                    - move the chess piece [***example***] d7 d8 queen.
+                    - pawn promotion is optional, only for moves that would promote a pawn
+                    resign - concede victory to opponent
+                    leave - drop yourself from the game so someone else can play
+                    help - with possible commands
+                    """;
+        }
     }
 
     public String getLoginState() {

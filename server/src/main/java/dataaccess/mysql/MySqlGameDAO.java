@@ -99,13 +99,14 @@ public class MySqlGameDAO extends MySqlDataAccess implements GameDAO {
             String statement = "UPDATE game SET json = ? WHERE id = ?";
 
             try (var preparedStatement = connection.prepareStatement(statement)) {
-                preparedStatement.setString(1, new Gson().toJson(theGame));
+                preparedStatement.setString(1, new Gson().toJson(theGame.game()));
                 preparedStatement.setInt(2, theGame.gameID());
+
+                preparedStatement.executeUpdate();
             }
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
-
     }
 
     public int size() throws DataAccessException {

@@ -3,11 +3,11 @@ package websocket.messages;
 import com.google.gson.Gson;
 
 public class ErrorMessage extends ServerMessage {
-    private String error;
+    private String errorMessage;
 
     public ErrorMessage(String theError) {
         super(ServerMessageType.ERROR);
-        error = theError;
+        errorMessage = theError;
     }
 
     @Override

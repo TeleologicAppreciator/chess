@@ -35,8 +35,8 @@ public class WebSocketCommunicator extends Endpoint {
 
     public void onOpen(Session session, EndpointConfig config) {}
 
-    private void notifyClient(ServerMessageWithString theNotificationOrError) {
-        System.out.println(theNotificationOrError.getMessage());
+    private void notifyClient(ServerMessage theNotificationOrError) {
+        System.out.println(new Gson().fromJson(theNotificationOrError.toString(), String.class));
     }
 
     private void load(LoadGameMessage theGameToLoad) {}

@@ -242,4 +242,9 @@ public class ChessGame {
     public void setGameOver() {
         isGameOver = true;
     }
+
+    @Override
+    public String toString() {
+        return "debug: " + getTeamTurn().toString();
+    }
 }

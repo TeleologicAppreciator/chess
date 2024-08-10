@@ -1,14 +1,17 @@
 package client;
 
-import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
+import java.util.Collection;
+
 public class ChessBoardDrawer {
     private ChessGame game;
+    private boolean isBlackPerspective;
 
-    public ChessBoardDrawer(ChessGame theChessGame) {
+    public ChessBoardDrawer(ChessGame theChessGame, boolean isBlackPerspective) {
         game = theChessGame;
     }
 
@@ -16,34 +19,49 @@ public class ChessBoardDrawer {
         game = theChessGame;
     }
 
-    public void drawChessBoard(boolean isBlackPerspective) {
+    public void drawChessBoard() {
         System.out.print(EscapeSequences.SET_TEXT_BOLD);
 
         //line 1
         drawChessTop(isBlackPerspective);
-        drawChessBoardBody(isBlackPerspective);
+        drawChessBoardBody(isBlackPerspective, null);
         drawChessTop(isBlackPerspective);
 
-        System.out.println();
-        System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
-        System.out.print(EscapeSequences.RESET_TEXT_BOLD_FAINT);
+        resetConsole();
     }
 
-    private void drawChessBoardBody(boolean isBlackPerspective) {
+    public void drawValidMoves(ChessPosition thePositionOfPieceToDrawValidMoves) {
+        System.out.print(EscapeSequences.SET_TEXT_BOLD);
+
+        drawChessTop(isBlackPerspective);
+        drawChessBoardBody(isBlackPerspective, thePositionOfPieceToDrawValidMoves);
+        drawChessTop(isBlackPerspective);
+
+        resetConsole();
+    }
+
+    private void drawChessBoardBody(boolean isBlackPerspective, ChessPosition thePositionOfPieceToDrawValidMoves) {
+        Collection<ChessMove> validMoves = null;
+        if(thePositionOfPieceToDrawValidMoves != null) {
+            validMoves = game.validMoves(thePositionOfPieceToDrawValidMoves);
+        }
+
         if (isBlackPerspective) {
-            drawChessBodyBlackPerspective();
+            drawChessBodyBlackPerspective(validMoves);
         } else {
-            drawChessBodyWhitePerspective();
+            drawChessBodyWhitePerspective(validMoves);
         }
     }
 
-    private void drawChessBodyBlackPerspective() {
+    private void drawChessBodyBlackPerspective(Collection<ChessMove> validMoves) {
         for (int row = 1; row <= 8; ++row) {
             System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
             drawChessSide(row);
 
             for (int column = 7; column >= 0; column--) {
-                correctTileOrder(row, column);
+                boolean isValidMoveSquare = isValidMovePosition(row, column+1, validMoves);
+
+                correctTileOrder(row, column, isValidMoveSquare);
 
                 printChessPiece(row, column);
             }
@@ -52,13 +70,15 @@ public class ChessBoardDrawer {
         }
     }
 
-    private void drawChessBodyWhitePerspective() {
+    private void drawChessBodyWhitePerspective(Collection<ChessMove> validMoves) {
         for (int row = 8; row > 0; --row) {
             System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
             drawChessSide(row);
 
             for (int column = 0; column < 8; column++) {
-                correctTileOrder(row, column);
+                boolean isValidMoveSquare = isValidMovePosition(row, column+1, validMoves);
+
+                correctTileOrder(row, column, isValidMoveSquare);
 
                 printChessPiece(row, column);
             }
@@ -67,27 +87,61 @@ public class ChessBoardDrawer {
         }
     }
 
-    private void correctTileOrder(int row, int column) {
+    private boolean isValidMovePosition(int row, int column, Collection<ChessMove> validMoves) {
+        if(validMoves == null) {
+            return false;
+        }
+
+        ChessPosition positionToCheck = new ChessPosition(row, column);
+
+        boolean positionToCheckIsValidMove = false;
+
+        for (ChessMove move : validMoves) {
+            if(move.getEndPosition().equals(positionToCheck)) {
+                positionToCheckIsValidMove = true;
+            }
+        }
+
+        return positionToCheckIsValidMove;
+    }
+
+    private void correctTileOrder(int row, int column, boolean isValidMoveSquare) {
         if (row % 2 == 0) {
-            whiteTilesFirst(column);
+            whiteTilesFirst(column, isValidMoveSquare);
         } else {
-            blackTilesFirst(column);
+            blackTilesFirst(column, isValidMoveSquare);
         }
     }
 
-    private void whiteTilesFirst(int column) {
+    private void whiteTilesFirst(int column, boolean isValidMoveSquare) {
         if (column % 2 == 0) {
-            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+            if (isValidMoveSquare) {
+                System.out.print(EscapeSequences.SET_BG_COLOR_GREEN);
+            } else {
+                System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+            }
         } else {
-            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+            if (isValidMoveSquare) {
+                System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+            } else {
+                System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+            }
         }
     }
 
-    private void blackTilesFirst(int column) {
+    private void blackTilesFirst(int column, boolean isValidMoveSquare) {
         if (column % 2 == 0) {
-            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+            if (isValidMoveSquare) {
+                System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+            } else {
+                System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+            }
         } else {
-            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+            if (isValidMoveSquare) {
+                System.out.print(EscapeSequences.SET_BG_COLOR_GREEN);
+            } else {
+                System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+            }
         }
     }
 
@@ -145,5 +199,11 @@ public class ChessBoardDrawer {
         System.out.print(" ");
         System.out.print(theLineNumber);
         System.out.print(" ");
+    }
+
+    private void resetConsole() {
+        System.out.println();
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
+        System.out.print(EscapeSequences.RESET_TEXT_BOLD_FAINT);
     }
 }
